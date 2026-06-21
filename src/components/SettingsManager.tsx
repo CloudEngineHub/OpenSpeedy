@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import {
@@ -18,7 +18,6 @@ import { useSettings } from "../hooks/useSettings";
 import { useShortcut } from "../hooks/useShortcut";
 import { useSnackbar } from "../contexts/SnackbarContext";
 import type { SettingsState } from "../store/settings";
-import { DEFAULTS } from "../store/settings";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -35,21 +34,12 @@ function Row({ label, children }: { label: React.ReactNode; children: React.Reac
 
 export default function SettingsManager() {
   const { t } = useTranslation();
-  const { getAll, set, get } = useSettings();
+  const { settings, get, set } = useSettings();
   const { register, unregister } = useShortcut();
   const { notify } = useSnackbar();
-  const [settings, setSettings] = useState<SettingsState>(DEFAULTS);
 
-  // Wrapper: persist to cache AND update local state
-  async function setBoth<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
-    await set(key, value);
-    setSettings(prev => ({ ...prev!, [key]: value }));
-  }
-
-  // Load config on mount
-  useEffect(() => { getAll().then(s => {console.log(s); setSettings(s); }); }, []);
   // Sync auto-start state from system on mount
-  useEffect(() => { isEnabled().then(v => setBoth("autoStart", v)).catch(() => { }); }, []);
+  useEffect(() => { isEnabled().then(v => set("autoStart", v)).catch(() => { }); }, []);
 
   async function changeShortcut(key: keyof SettingsState, oldVal: string, newVal: string, cb: () => void) {
     if (oldVal) await unregister(oldVal).catch(() => { });
@@ -61,7 +51,13 @@ export default function SettingsManager() {
         notify(t("settings.registerFail", { shortcut: newVal }), "error");
       }
     }
-    await setBoth(key as keyof SettingsState, newVal);
+    await set(key as keyof SettingsState, newVal);
+  }
+
+  if (!settings) {
+    return <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Typography color="text.disabled">{t("settings.loading")}</Typography>
+    </Box>;
   }
 
   return (
@@ -94,13 +90,13 @@ export default function SettingsManager() {
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.increase")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
                 <ShortcutField value={settings.increaseSpeedShortcut} onChange={v => changeShortcut("increaseSpeedShortcut", settings.increaseSpeedShortcut, v, () => {
-                  invoke<number | null>("bridge_get_speed").then(c => { const n = (c ?? 1) + ((get("increaseSpeedStep") as number) || 0.5); invoke("bridge_set_speed", { factor: n }); setBoth("speed", n); });
+                  invoke<number | null>("bridge_get_speed").then(c => { const n = (c ?? 1) + ((get("increaseSpeedStep") as number) || 0.5); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
                 <TextField type="number" size="small"
                   value={settings.increaseSpeedStep}
-                  onChange={e => setBoth("increaseSpeedStep", Number(e.target.value) || 0.1)}
+                  onChange={e => set("increaseSpeedStep", Number(e.target.value) || 0.1)}
                   slotProps={{ htmlInput: { min: 0.1, max: 10, step: 0.1 } }} />
               </TableCell>
             </TableRow>
@@ -108,13 +104,13 @@ export default function SettingsManager() {
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.decrease")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
                 <ShortcutField value={settings.decreaseSpeedShortcut} onChange={v => changeShortcut("decreaseSpeedShortcut", settings.decreaseSpeedShortcut, v, () => {
-                  invoke<number | null>("bridge_get_speed").then(c => { const n = Math.max(0.01, (c ?? 1) - ((get("decreaseSpeedStep") as number) || 0.5)); invoke("bridge_set_speed", { factor: n }); setBoth("speed", n); });
+                  invoke<number | null>("bridge_get_speed").then(c => { const n = Math.max(0.01, (c ?? 1) - ((get("decreaseSpeedStep") as number) || 0.5)); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
                 <TextField type="number" size="small"
                   value={settings.decreaseSpeedStep}
-                  onChange={e => setBoth("decreaseSpeedStep", Number(e.target.value) || 0.1)}
+                  onChange={e => set("decreaseSpeedStep", Number(e.target.value) || 0.1)}
                   sx={{ width: 80 }}
                   slotProps={{ htmlInput: { min: 0.1, max: 100, step: 0.1 } }} />
               </TableCell>
@@ -123,7 +119,7 @@ export default function SettingsManager() {
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.reset")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }} colSpan={1}>
                 <ShortcutField value={settings.resetSpeedShortcut} onChange={v => changeShortcut("resetSpeedShortcut", settings.resetSpeedShortcut, v, () => {
-                  invoke("bridge_set_speed", { factor: 1.0 }); setBoth("speed", 1.0);
+                  invoke("bridge_set_speed", { factor: 1.0 }); set("speed", 1.0);
                 })} />
               </TableCell>
               <TableCell sx={{ borderBottom: "none" }}></TableCell>
@@ -169,7 +165,7 @@ export default function SettingsManager() {
                 <TableCell sx={{ borderBottom: "none" }}>
                   <TextField type="number" size="small"
                     value={settings?.[`gear${gear}Speed` as keyof SettingsState]}
-                    onChange={e => setBoth(`gear${gear}Speed` as keyof SettingsState, Number(e.target.value) || 1)}
+                    onChange={e => set(`gear${gear}Speed` as keyof SettingsState, Number(e.target.value) || 1)}
                     sx={{ width: 80 }}
                     slotProps={{ htmlInput: { min: 0.01, max: 100, step: 0.1 } }} />
                 </TableCell>
@@ -190,17 +186,17 @@ export default function SettingsManager() {
         <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><PowerSettingsNewIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.autoStart")}</Box>}>
           <Switch checked={settings.autoStart} onChange={async (_, v) => {
             if (v) await enable(); else await disable();
-            setBoth("autoStart", v);
+            set("autoStart", v);
           }} />
         </Row>
         <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><PushPinIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.alwaysOnTop")}</Box>}>
           <Switch checked={settings.alwaysOnTop as boolean} onChange={(_, v) => {
-            setBoth("alwaysOnTop", v);
+            set("alwaysOnTop", v);
             invoke("set_always_on_top", { onTop: v });
           }} />
         </Row>
         <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><LanguageIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.language")}</Box>}>
-          <Select size="small" value={settings.language} onChange={e => { const lng = e.target.value as "zh-CN" | "en-US"; setBoth("language", lng); i18n.changeLanguage(lng); }} sx={{ minWidth: 100 }}>
+          <Select size="small" value={settings.language} onChange={e => { const lng = e.target.value as "zh-CN" | "en-US"; set("language", lng); i18n.changeLanguage(lng); }} sx={{ minWidth: 100 }}>
             <MenuItem value="zh-CN">中文（简体）</MenuItem>
             <MenuItem value="zh-TW">中文（繁體）</MenuItem>
             <MenuItem value="ja-JP">日本語</MenuItem>

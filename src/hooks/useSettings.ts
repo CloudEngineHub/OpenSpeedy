@@ -12,11 +12,26 @@ function emit<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
 }
 
 export function useSettings() {
+  const [settings, setSettings] = useState<SettingsState | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!_loaded || !_cache) {
+        _cache = await loadSettings();
+        _loaded = true;
+      }
+      setSettings({ ..._cache });
+    })();
+    return subscribe((key, value) => {
+      setSettings(prev => prev ? { ...prev, [key]: value } as SettingsState : null);
+    });
+  }, []);
+
   const getAll = useCallback(async (): Promise<SettingsState> => {
-    if (_loaded && _cache) return { ..._cache };
     const s = await loadSettings();
     _cache = s;
     _loaded = true;
+    setSettings({ ...s });
     return s;
   }, []);
 
@@ -35,7 +50,7 @@ export function useSettings() {
     return () => { _listeners.delete(fn); };
   }, []);
 
-  return { getAll, get, set, subscribe };
+  return { settings, getAll, get, set, subscribe };
 }
 
 /** Listen to a specific key and call onChange when it changes */
