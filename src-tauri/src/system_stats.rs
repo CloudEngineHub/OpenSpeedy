@@ -8,10 +8,18 @@ use windows::Win32::System::SystemInformation::{
 use windows::Win32::System::Threading::GetSystemTimes;
 
 #[derive(Debug, Clone, Serialize)]
+pub struct GpuStats {
+    pub name: String,
+    pub used_mb: u64,
+    pub total_mb: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct SystemStats {
     pub memory_pct: f64,
     pub cpu_pct: f64,
     pub os_version: String,
+    pub gpu: Option<GpuStats>,
 }
 
 fn os_version() -> String {
@@ -112,7 +120,16 @@ pub fn get_system_stats() -> SystemStats {
         }
     };
 
-    SystemStats { memory_pct, cpu_pct, os_version: os_version() }
+    // GPU
+    let gpu = hypomnesis::Snapshot::now(0).ok().and_then(|snap| {
+        snap.gpu_device.map(|dev| GpuStats {
+            name: dev.name.unwrap_or_default(),
+            used_mb: (dev.total_bytes - dev.free_bytes) / (1024 * 1024),
+            total_mb: dev.total_bytes / (1024 * 1024),
+        })
+    });
+
+    SystemStats { memory_pct, cpu_pct, os_version: os_version(), gpu }
 }
 
 fn ft_to_u64(ft: &FILETIME) -> u64 {

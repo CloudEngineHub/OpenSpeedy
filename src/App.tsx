@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { getVersion } from "@tauri-apps/api/app";
-import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch } from "@mui/material";
+import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch, Chip } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import SpeedIcon from "@mui/icons-material/Speed";
 import SettingsIcon from "@mui/icons-material/Settings";
 import InfoIcon from "@mui/icons-material/Info";
@@ -28,6 +30,9 @@ function App() {
   const [version, setVersion] = useState("");
   const [b64, setB64] = useState<boolean | null>(null);
   const [b32, setB32] = useState<boolean | null>(null);
+  const [gpuName, setGpuName] = useState("");
+  const [gpuUsedMb, setGpuUsedMb] = useState(0);
+  const [gpuTotalMb, setGpuTotalMb] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
 
   // Sync Blueprint dark mode class
@@ -65,10 +70,11 @@ function App() {
 
   useInterval(async () => {
     try {
-      const s = await invoke<{ memory_pct: number; cpu_pct: number; os_version: string }>("get_system_stats");
+      const s = await invoke<{ memory_pct: number; cpu_pct: number; os_version: string; gpu: { name: string; used_mb: number; total_mb: number } | null }>("get_system_stats");
       setMemPct(s.memory_pct);
       setCpuPct(s.cpu_pct);
       setOsVer(s.os_version);
+      if (s.gpu) { setGpuName(s.gpu.name); setGpuUsedMb(s.gpu.used_mb); setGpuTotalMb(s.gpu.total_mb); }
     } catch {}
   }, 5000);
 
@@ -84,8 +90,8 @@ function App() {
 
   // Initial fetch
   useEffect(() => {
-    invoke<{ memory_pct: number; cpu_pct: number; os_version: string }>("get_system_stats")
-      .then(s => { setMemPct(s.memory_pct); setCpuPct(s.cpu_pct); setOsVer(s.os_version); }).catch(() => {});
+    invoke<{ memory_pct: number; cpu_pct: number; os_version: string; gpu: { name: string; used_mb: number; total_mb: number } | null }>("get_system_stats")
+      .then(s => { setMemPct(s.memory_pct); setCpuPct(s.cpu_pct); setOsVer(s.os_version); if (s.gpu) { setGpuName(s.gpu.name); setGpuUsedMb(s.gpu.used_mb); setGpuTotalMb(s.gpu.total_mb); } }).catch(() => {});
     getVersion().then(setVersion).catch(() => {});
     invoke<boolean>("bridge64_health").catch(() => false).then(setB64);
     invoke<boolean>("bridge32_health").catch(() => false).then(setB32);
@@ -96,7 +102,7 @@ function App() {
       <CssBaseline />
       <SnackbarProvider>
       <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
-        <TitleBar osVer={osVer} cpuPct={cpuPct} memPct={memPct} b64={b64} b32={b32} />
+        <TitleBar osVer={osVer} cpuPct={cpuPct} memPct={memPct} gpuName={gpuName} gpuUsedMb={gpuUsedMb} gpuTotalMb={gpuTotalMb} />
 
         <Box sx={{ flex: 1, display: "flex" }}>
           <Box sx={{ height: "calc(100vh - 48px)", borderRight: 1, borderColor: "divider", bgcolor: "background.paper", display: "flex", flexDirection: "column" }}>
@@ -107,6 +113,12 @@ function App() {
               <Tab icon={<InfoIcon />} label={t("app.tabs.about")} />
             </Tabs>
             <Box sx={{ flex: 1 }} />
+
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, px: 1, pb: 0.5 }}>
+              <BridgeChip ok={b64} label="B64" />
+              <BridgeChip ok={b32} label="B32" />
+            </Box>
+
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", pb: 1 }}>
               {darkMode ? <DarkModeIcon sx={{ fontSize: 14, color: "text.secondary" }} /> : <LightModeIcon sx={{ fontSize: 14, color: "text.secondary" }} />}
               <Switch size="small" checked={darkMode} onChange={(_, v) => setDarkMode(v)} />
@@ -162,6 +174,19 @@ function App() {
       </Box>
       </SnackbarProvider>
     </ThemeProvider>
+  );
+}
+
+function BridgeChip({ ok, label }: { ok: boolean | null; label: string }) {
+  return (
+    <Chip
+      icon={ok === null ? undefined : ok ? <CheckCircleIcon /> : <ErrorIcon />}
+      label={ok === null ? label : ok ? label : label}
+      size="small"
+      color={ok === null ? "default" : ok ? "success" : "error"}
+      variant="filled"
+      sx={{ height: 22, fontSize: "0.65rem" }}
+    />
   );
 }
 

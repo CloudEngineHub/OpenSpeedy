@@ -1,39 +1,56 @@
-import { Box, Typography, AppBar, Toolbar, Chip, CircularProgress } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Typography, AppBar, Toolbar, CircularProgress } from "@mui/material";
 import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
-import MinimizeIcon from "@mui/icons-material/Minimize";
+import MinusIcon from "@mui/icons-material/Remove";
 import CropSquareIcon from "@mui/icons-material/CropSquare";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+
+const STATS_BREAKPOINT = 720;
 
 interface TitleBarProps {
   osVer: string;
   cpuPct: number;
   memPct: number;
-  b64: boolean | null;
-  b32: boolean | null;
+  gpuName: string;
+  gpuUsedMb: number;
+  gpuTotalMb: number;
 }
 
-export default function TitleBar({ osVer, cpuPct, memPct, b64, b32 }: TitleBarProps) {
+function fmtGpuMb(mb: number): string {
+  if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
+  return `${mb} MB`;
+}
+
+export default function TitleBar({ osVer, cpuPct, memPct, gpuName, gpuUsedMb, gpuTotalMb }: TitleBarProps) {
+  const [wide, setWide] = useState(window.innerWidth >= STATS_BREAKPOINT);
+
+  useEffect(() => {
+    const onResize = () => setWide(window.innerWidth >= STATS_BREAKPOINT);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   return (
     <AppBar position="static" elevation={0}
       sx={{ bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", color: "text.primary" }}>
       <Toolbar variant="dense" sx={{ gap: 1.5, minHeight: 48, pr: "0 !important" }}
         data-tauri-drag-region>
-        <DeveloperBoardIcon sx={{ color: "primary.main", fontSize: 20 }} />
-        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{osVer}</Typography>
-        <Box sx={{ flex: 1 }} />
+        <DeveloperBoardIcon sx={{ color: "primary.main", fontSize: 20, flexShrink: 0 }} />
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500, flexShrink: 0 }}>{osVer}</Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }} />
 
-        <StatBadge value={cpuPct} label="CPU" />
-        <StatBadge value={memPct} label="RAM" />
+        {wide && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, overflow: "hidden", minWidth: 0, flexShrink: 1 }}>
+            <StatBadge value={cpuPct} label="CPU" />
+            <StatBadge value={memPct} label="RAM" />
+            {gpuName && <GPUStat name={gpuName} usedMb={gpuUsedMb} totalMb={gpuTotalMb} />}
+          </Box>
+        )}
 
-        <BridgeChip ok={b64} label="Bridge64" />
-        <BridgeChip ok={b32} label="Bridge32" />
-
-        <Box sx={{ display: "flex", height: 48, ml: 1, "& > div": { width: 46, display: "flex", alignItems: "center", justifyContent: "center", cursor: "default", "&:hover": { bgcolor: "action.hover" } } }}>
+        <Box sx={{ display: "flex", height: 48, ml: 1, flexShrink: 0, "& > div": { width: 46, display: "flex", alignItems: "center", justifyContent: "center", cursor: "default", "&:hover": { bgcolor: "action.hover" } } }}>
           <Box onClick={() => getCurrentWindow().minimize()}>
-            <MinimizeIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+            <MinusIcon sx={{ fontSize: 16, color: "text.secondary" }} />
           </Box>
           <Box onClick={() => getCurrentWindow().toggleMaximize()}>
             <CropSquareIcon sx={{ fontSize: 14, color: "text.secondary" }} />
@@ -47,9 +64,26 @@ export default function TitleBar({ osVer, cpuPct, memPct, b64, b32 }: TitleBarPr
   );
 }
 
+function GPUStat({ name, usedMb, totalMb }: { name: string; usedMb: number; totalMb: number }) {
+  const pct = totalMb > 0 ? (usedMb / totalMb) * 100 : 0;
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mr: 0.5, flexShrink: 1, minWidth: 0 }}>
+      <Box sx={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
+        <CircularProgress variant="determinate" value={100} size={28} thickness={5} sx={{ color: "divider" }} />
+        <CircularProgress variant="determinate" value={pct} size={28} thickness={5}
+          sx={{ position: "absolute", left: 0, color: pct > 80 ? "error.main" : pct > 60 ? "warning.main" : "secondary.main" }} />
+      </Box>
+      <Box sx={{ minWidth: 0, overflow: "hidden" }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, fontSize: "0.7rem", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 70 }}>{name}</Typography>
+        <Typography variant="caption" sx={{ color: "text.disabled", fontSize: "0.6rem", display: "block", lineHeight: 1 }}>{fmtGpuMb(usedMb)} / {fmtGpuMb(totalMb)}</Typography>
+      </Box>
+    </Box>
+  );
+}
+
 function StatBadge({ value, label }: { value: number; label: string }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mr: 0.5 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mr: 0.5, flexShrink: 1, minWidth: 0 }}>
       <Box sx={{ position: "relative", display: "inline-flex" }}>
         <CircularProgress variant="determinate" value={100} size={28} thickness={5} sx={{ color: "divider" }} />
         <CircularProgress variant="determinate" value={value} size={28} thickness={5}
@@ -60,18 +94,5 @@ function StatBadge({ value, label }: { value: number; label: string }) {
         <Typography variant="caption" sx={{ color: "text.disabled", fontSize: "0.6rem", display: "block", lineHeight: 1 }}>{label}</Typography>
       </Box>
     </Box>
-  );
-}
-
-function BridgeChip({ ok, label }: { ok: boolean | null; label: string }) {
-  return (
-    <Chip
-      icon={ok === null ? undefined : ok ? <CheckCircleIcon /> : <ErrorIcon />}
-      label={ok === null ? label : ok ? label : label}
-      size="small"
-      color={ok === null ? "default" : ok ? "success" : "error"}
-      variant="filled"
-      sx={{ height: 24, fontSize: "0.7rem" }}
-    />
   );
 }
