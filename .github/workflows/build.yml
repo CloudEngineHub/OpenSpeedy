@@ -58,9 +58,11 @@ jobs:
             src-tauri/target/release/speedpatch32.dll
             src-tauri/target/release/speedpatch64.dll
 
-  sign-msi:
+  sign:
     needs: build
     runs-on: windows-latest
+    environment: production
+
     steps:
       - name: SignPath signing (MSI)
         uses: signpath/github-action-submit-signing-request@v1.1
@@ -74,16 +76,6 @@ jobs:
           wait-for-completion: true
           output-artifact-directory: signed-msi/
 
-      - name: Upload signed MSI
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenSpeedy-${{ needs.build.outputs.version }}-msi-signed
-          path: signed-msi/
-
-  sign-portable:
-    needs: build
-    runs-on: windows-latest
-    steps:
       - name: SignPath signing (Portable)
         uses: signpath/github-action-submit-signing-request@v1.1
         with:
@@ -95,6 +87,12 @@ jobs:
           artifact-configuration-slug: zip
           wait-for-completion: true
           output-artifact-directory: signed-portable/
+
+      - name: Upload signed MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenSpeedy-${{ needs.build.outputs.version }}-msi-signed
+          path: signed-msi/
 
       - name: Upload signed portable
         uses: actions/upload-artifact@v4
