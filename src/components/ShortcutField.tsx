@@ -36,9 +36,10 @@ interface ShortcutFieldProps {
     onChange: (shortcut: string) => void;
     disable?: boolean;
     minWidth?: string;
+    conflict?: boolean;
 }
 
-export default function ShortcutField({ value, onChange, disable = false, minWidth = '10rem' }: ShortcutFieldProps) {
+export default function ShortcutField({ value, onChange, disable = false, minWidth = '10rem', conflict = false }: ShortcutFieldProps) {
     const { t } = useTranslation();
     const [isRecording, setIsRecording] = useState(false);
     const [currentCombo, setCurrentCombo] = useState('');
@@ -231,7 +232,7 @@ export default function ShortcutField({ value, onChange, disable = false, minWid
                 alignItems: 'center',
                 gap: 2,
                 border: 1,
-                borderColor: "divider",
+                borderColor: conflict ? "error.main" : "divider",
                 borderRadius: 1,
                 padding: '0.5rem 0.75rem',
                 minWidth,
@@ -270,6 +271,11 @@ export default function ShortcutField({ value, onChange, disable = false, minWid
             ) : (
                 value ? (
                     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {conflict && (
+                            <Typography variant="caption" sx={{ color: "error.main", fontWeight: 600, mr: 0.5 }}>
+                                ⚠
+                            </Typography>
+                        )}
                         {value.split('+').map((key, index, array) => (
                             <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <KeyComboTag combo={key === 'Command' ? 'meta' : key} />

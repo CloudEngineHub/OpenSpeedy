@@ -1,7 +1,10 @@
 //! Named-pipe client for communicating with bridge64.exe / bridge32.exe.
+//! Uses persistent pipe connections — one HANDLE cached per pipe, reused
+//! across commands. Reconnects automatically if the pipe breaks.
 
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
+use std::sync::Mutex;
 use windows::core::PCWSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
 use windows::Win32::Storage::FileSystem::{
@@ -10,6 +13,13 @@ use windows::Win32::Storage::FileSystem::{
 
 const PIPE_64: &str = r"\\.\pipe\OpenSpeedyBridge64";
 const PIPE_32: &str = r"\\.\pipe\OpenSpeedyBridge32";
+
+// HANDLE is not Send, so store the raw value as isize
+static P64: Mutex<Option<isize>> = Mutex::new(None);
+static P32: Mutex<Option<isize>> = Mutex::new(None);
+
+fn handle_val(h: HANDLE) -> isize { h.0 as isize }
+fn handle_from(v: isize) -> HANDLE { HANDLE(v as *mut std::ffi::c_void) }
 
 fn to_wide(s: &str) -> Vec<u16> {
     OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
@@ -34,24 +44,61 @@ fn open_pipe(name: &str) -> Option<HANDLE> {
     }
 }
 
+fn cache_for(pipe: &str) -> &Mutex<Option<isize>> {
+    if pipe == PIPE_32 { &P32 } else { &P64 }
+}
+
+/// Send one command over a persistent pipe connection. Returns the response
+/// string on success, or `None` if the pipe is unavailable after a reconnect
+/// attempt.
 fn pipe_command(pipe: &str, cmd: &str) -> Option<String> {
+    let cache = cache_for(pipe);
+    let mut guard = cache.lock().unwrap();
+
+    // Try the cached handle first
+    if let Some(raw) = *guard {
+        let h = handle_from(raw);
+        match send_recv(h, cmd) {
+            Ok(resp) => return Some(resp),
+            Err(_) => {
+                // Pipe broken — close the stale handle and reconnect
+                eprintln!("[bridge] {cmd} → pipe broken, reconnecting…");
+                unsafe { let _ = CloseHandle(h); }
+                *guard = None;
+            }
+        }
+    }
+
+    // Open a new connection
     let h = open_pipe(pipe)?;
+    match send_recv(h, cmd) {
+        Ok(resp) => {
+            *guard = Some(handle_val(h)); // cache for next command
+            Some(resp)
+        }
+        Err(_) => {
+            unsafe { let _ = CloseHandle(h); }
+            eprintln!("[bridge] {cmd} → pipe read failed on new connection");
+            None
+        }
+    }
+}
+
+/// Write a command and read one response line.  Does NOT close the handle.
+fn send_recv(h: HANDLE, cmd: &str) -> Result<String, ()> {
     let msg = format!("{cmd}\n");
     let mut written = 0u32;
-    let _ = unsafe { WriteFile(h, Some(msg.as_bytes()), Some(&mut written), None) };
+    let wr = unsafe { WriteFile(h, Some(msg.as_bytes()), Some(&mut written), None) };
+    if wr.is_err() { return Err(()); }
 
     let mut buf = [0u8; 256];
     let mut nread = 0u32;
-    let ok = unsafe { ReadFile(h, Some(&mut buf), Some(&mut nread), None) };
-    unsafe { let _ = CloseHandle(h); }
+    let rd = unsafe { ReadFile(h, Some(&mut buf), Some(&mut nread), None) };
+    if rd.is_err() || nread == 0 { return Err(()); }
 
-    if ok.is_err() || nread == 0 {
-        eprintln!("[bridge] {cmd} → pipe read failed (err={:?}, nread={nread})", ok.err());
-        return None;
-    }
     let resp = String::from_utf8_lossy(&buf[..nread as usize]).trim().to_string();
     eprintln!("[bridge] {cmd} → {resp}");
-    Some(resp)
+    Ok(resp)
 }
 
 /// Check if bridge64 is running and responsive.

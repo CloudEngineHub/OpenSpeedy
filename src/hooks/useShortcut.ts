@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import * as GlobalShortcut from "@tauri-apps/plugin-global-shortcut";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "./useSettings";
@@ -9,34 +9,67 @@ type ShortcutTriggerState = {
   state: "Pressed" | "Released";
 };
 
+// Module-level — tracks which shortcuts failed to register
+let _statusCache: Record<string, boolean> = {};
+const _statusListeners = new Set<(s: Record<string, boolean>) => void>();
+
+function emitStatusChange(s: Record<string, boolean>) {
+  _statusListeners.forEach(fn => fn(s));
+}
+
 export function useShortcut() {
   const { getAll, get, set } = useSettings();
+  const [shortcutStatus, setShortcutStatus] = useState<Record<string, boolean>>(_statusCache);
 
-  const register = useCallback(async (shortcut: string, callback: () => void) => {
-    if (!shortcut) return;
-    if (await GlobalShortcut.isRegistered(shortcut)) await GlobalShortcut.unregister(shortcut);
-    await GlobalShortcut.register(shortcut, ({ state }: ShortcutTriggerState) => {
+  useEffect(() => {
+    const fn = (s: Record<string, boolean>) => setShortcutStatus({ ...s });
+    _statusListeners.add(fn);
+    return () => { _statusListeners.delete(fn); };
+  }, []);
+
+  const doRegister = useCallback(async (
+    shortcut: string,
+    handler: (s: ShortcutTriggerState) => void,
+  ): Promise<boolean> => {
+    if (!shortcut) return false;
+    try {
+      await GlobalShortcut.register(shortcut, handler);
+      _statusCache = { ..._statusCache, [shortcut]: true };
+      emitStatusChange(_statusCache);
+      console.log("[shortcut] register OK:", shortcut);
+      return true;
+    } catch (e) {
+      console.error("[shortcut] register FAIL:", shortcut, e);
+      _statusCache = { ..._statusCache, [shortcut]: false };
+      emitStatusChange(_statusCache);
+      return false;
+    }
+  }, []);
+
+  const register = useCallback(async (shortcut: string, callback: () => void): Promise<boolean> => {
+    return doRegister(shortcut, ({ state }: ShortcutTriggerState) => {
       if (state !== "Pressed") return;
       callback();
     });
-  }, []);
+  }, [doRegister]);
 
   const registerHold = useCallback(async (
     shortcut: string,
     onPress: () => void,
     onRelease: () => void,
-  ) => {
-    if (!shortcut) return;
-    if (await GlobalShortcut.isRegistered(shortcut)) await GlobalShortcut.unregister(shortcut);
-    await GlobalShortcut.register(shortcut, ({ state }: ShortcutTriggerState) => {
+  ): Promise<boolean> => {
+    return doRegister(shortcut, ({ state }: ShortcutTriggerState) => {
       if (state === "Pressed") onPress();
       else onRelease();
     });
-  }, []);
+  }, [doRegister]);
 
   const unregister = useCallback(async (shortcut: string) => {
     if (!shortcut) return;
     if (await GlobalShortcut.isRegistered(shortcut)) await GlobalShortcut.unregister(shortcut);
+    const { [shortcut]: _, ...rest } = _statusCache;
+    _statusCache = rest;
+    emitStatusChange(_statusCache);
   }, []);
 
   const init = useCallback(async () => {
@@ -85,5 +118,5 @@ export function useShortcut() {
     }
   }, [register, registerHold, set, getAll, get]);
 
-  return { register, registerHold, unregister, init };
+  return { register, registerHold, unregister, init, shortcutStatus };
 }

@@ -35,7 +35,7 @@ function Row({ label, children }: { label: React.ReactNode; children: React.Reac
 export default function SettingsManager() {
   const { t } = useTranslation();
   const { settings, get, set } = useSettings();
-  const { register, registerHold, unregister } = useShortcut();
+  const { register, registerHold, unregister, shortcutStatus } = useShortcut();
   const { notify } = useSnackbar();
 
   // Sync auto-start state from system on mount
@@ -44,10 +44,10 @@ export default function SettingsManager() {
   async function changeShortcut(key: keyof SettingsState, oldVal: string, newVal: string, cb: () => void) {
     if (oldVal) await unregister(oldVal).catch(() => { });
     if (newVal) {
-      try {
-        await register(newVal, cb);
+      const ok = await register(newVal, cb).catch(() => false);
+      if (ok) {
         notify(t("settings.registerSuccess", { shortcut: newVal }), "success");
-      } catch {
+      } else {
         notify(t("settings.registerFail", { shortcut: newVal }), "error");
       }
     }
@@ -57,10 +57,10 @@ export default function SettingsManager() {
   async function changeHoldShortcut(oldVal: string, newVal: string, onPress: () => void, onRelease: () => void) {
     if (oldVal) await unregister(oldVal).catch(() => { });
     if (newVal) {
-      try {
-        await registerHold(newVal, onPress, onRelease);
+      const ok = await registerHold(newVal, onPress, onRelease).catch(() => false);
+      if (ok) {
         notify(t("settings.registerSuccess", { shortcut: newVal }), "success");
-      } catch {
+      } else {
         notify(t("settings.registerFail", { shortcut: newVal }), "error");
       }
     }
@@ -102,7 +102,7 @@ export default function SettingsManager() {
             <TableRow>
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.increase")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
-                <ShortcutField value={settings.increaseSpeedShortcut} onChange={v => changeShortcut("increaseSpeedShortcut", settings.increaseSpeedShortcut, v, () => {
+                <ShortcutField value={settings.increaseSpeedShortcut} conflict={shortcutStatus[settings.increaseSpeedShortcut] === false} onChange={v => changeShortcut("increaseSpeedShortcut", settings.increaseSpeedShortcut, v, () => {
                   invoke<number | null>("bridge_get_speed").then(c => { const n = (c ?? 1) + ((get("increaseSpeedStep") as number) || 0.5); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
@@ -116,7 +116,7 @@ export default function SettingsManager() {
             <TableRow>
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.decrease")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }}>
-                <ShortcutField value={settings.decreaseSpeedShortcut} onChange={v => changeShortcut("decreaseSpeedShortcut", settings.decreaseSpeedShortcut, v, () => {
+                <ShortcutField value={settings.decreaseSpeedShortcut} conflict={shortcutStatus[settings.decreaseSpeedShortcut] === false} onChange={v => changeShortcut("decreaseSpeedShortcut", settings.decreaseSpeedShortcut, v, () => {
                   invoke<number | null>("bridge_get_speed").then(c => { const n = Math.max(0.01, (c ?? 1) - ((get("decreaseSpeedStep") as number) || 0.5)); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
@@ -131,7 +131,7 @@ export default function SettingsManager() {
             <TableRow>
               <TableCell sx={{ borderBottom: "none" }}>{t("settings.reset")}</TableCell>
               <TableCell sx={{ borderBottom: "none" }} colSpan={1}>
-                <ShortcutField value={settings.resetSpeedShortcut} onChange={v => changeShortcut("resetSpeedShortcut", settings.resetSpeedShortcut, v, () => {
+                <ShortcutField value={settings.resetSpeedShortcut} conflict={shortcutStatus[settings.resetSpeedShortcut] === false} onChange={v => changeShortcut("resetSpeedShortcut", settings.resetSpeedShortcut, v, () => {
                   invoke("bridge_set_speed", { factor: 1.0 }); set("speed", 1.0);
                 })} />
               </TableCell>
@@ -169,6 +169,7 @@ export default function SettingsManager() {
                 <TableCell sx={{ borderBottom: "none" }}>
                   <ShortcutField
                     value={settings?.[`gear${gear}Shortcut` as keyof SettingsState] as string}
+                    conflict={shortcutStatus[settings?.[`gear${gear}Shortcut` as keyof SettingsState] as string] === false}
                     onChange={v => changeShortcut(`gear${gear}Shortcut` as keyof SettingsState, settings?.[`gear${gear}Shortcut` as keyof SettingsState] as string, v, () => {
                       const gs = (get(`gear${gear}Speed` as keyof SettingsState) as number) || 1;
                       invoke("bridge_set_speed", { factor: gs });
@@ -190,6 +191,7 @@ export default function SettingsManager() {
               <TableCell sx={{ borderBottom: "none" }}>
                 <ShortcutField
                   value={settings?.holdShortcut as string}
+                  conflict={shortcutStatus[settings?.holdShortcut as string] === false}
                   onChange={v => {
                     const old = settings?.holdShortcut as string;
                     changeHoldShortcut(old, v, () => {

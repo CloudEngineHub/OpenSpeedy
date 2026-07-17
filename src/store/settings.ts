@@ -32,9 +32,9 @@ export interface SettingsState {
 // ── Defaults ──────────────────────────────────────────────────────────────
 
 export const DEFAULTS: SettingsState = {
-  increaseSpeedShortcut: "Ctrl+Alt+ArrowUp",
+  increaseSpeedShortcut: "",
   increaseSpeedStep: 0.5,
-  decreaseSpeedShortcut: "Ctrl+Alt+ArrowDown",
+  decreaseSpeedShortcut: "",
   decreaseSpeedStep: 0.5,
   resetSpeedShortcut: "Ctrl+Alt+0",
 
