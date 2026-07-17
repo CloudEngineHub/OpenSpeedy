@@ -304,10 +304,10 @@ UINT_PTR WINAPI DetourSetTimer(HWND      hWnd,
         );
 }
 
-static DWORD baselineKernelTimeGetTime = 0;
-static DWORD baselineDetourTimeGetTime = 0;
-static DWORD prevcallKernelTimeGetTime = 0;
-static DWORD prevcallDetourTimeGetTime = 0;
+static std::atomic<DWORD> baselineKernelTimeGetTime = 0;
+static std::atomic<DWORD> baselineDetourTimeGetTime = 0;
+static std::atomic<DWORD> prevcallKernelTimeGetTime = 0;
+static std::atomic<DWORD> prevcallDetourTimeGetTime = 0;
 static std::atomic<bool> shouldUpdateTimeGetTime = false;
 
 DWORD WINAPI DetourTimeGetTime(VOID)
@@ -321,14 +321,16 @@ DWORD WINAPI DetourTimeGetTime(VOID)
     bool expected = true;
     if (shouldUpdateTimeGetTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelTimeGetTime = prevcallKernelTimeGetTime;
-        baselineDetourTimeGetTime = prevcallDetourTimeGetTime;
+        baselineKernelTimeGetTime.store(prevcallKernelTimeGetTime.load());
+        baselineDetourTimeGetTime.store(prevcallDetourTimeGetTime.load());
     }
     DWORD now = realTimeGetTime();
-    prevcallKernelTimeGetTime = now;
-    DWORD delta = SpeedFactor() * (now - baselineKernelTimeGetTime);
-    prevcallDetourTimeGetTime = baselineDetourTimeGetTime + delta;
-    return baselineDetourTimeGetTime + delta;
+    prevcallKernelTimeGetTime.store(now);
+    DWORD bk = baselineKernelTimeGetTime.load();
+    DWORD delta = SpeedFactor() * (now - bk);
+    DWORD bd = baselineDetourTimeGetTime.load();
+    prevcallDetourTimeGetTime.store(bd + delta);
+    return bd + delta;
 }
 
 MMRESULT WINAPI DetourTimeSetEvent(UINT           uDelay,
@@ -345,10 +347,10 @@ MMRESULT WINAPI DetourTimeSetEvent(UINT           uDelay,
         fuEvent);
 }
 
-static LONG baselineKernelGetMessageTime = 0;
-static LONG baselineDetourGetMessageTime = 0;
-static LONG prevcallKernelGetMessageTime = 0;
-static LONG prevcallDetourGetMessageTime = 0;
+static std::atomic<LONG> baselineKernelGetMessageTime = 0;
+static std::atomic<LONG> baselineDetourGetMessageTime = 0;
+static std::atomic<LONG> prevcallKernelGetMessageTime = 0;
+static std::atomic<LONG> prevcallDetourGetMessageTime = 0;
 static std::atomic<bool> shouldUpdateGetMessageTime = false;
 LONG WINAPI DetourGetMessageTime(VOID)
 {
@@ -361,20 +363,22 @@ LONG WINAPI DetourGetMessageTime(VOID)
     bool expected = true;
     if (shouldUpdateGetMessageTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetMessageTime = prevcallKernelGetMessageTime;
-        baselineDetourGetMessageTime = prevcallDetourGetMessageTime;
+        baselineKernelGetMessageTime.store(prevcallKernelGetMessageTime.load());
+        baselineDetourGetMessageTime.store(prevcallDetourGetMessageTime.load());
     }
     LONG now = realGetMessageTime();
-    prevcallKernelGetMessageTime = now;
-    DWORD delta = SpeedFactor() * (now - baselineKernelGetMessageTime);
-    prevcallDetourGetMessageTime = baselineDetourGetMessageTime + delta;
-    return baselineDetourGetMessageTime + delta;
+    prevcallKernelGetMessageTime.store(now);
+    LONG bk = baselineKernelGetMessageTime.load();
+    DWORD delta = SpeedFactor() * (now - bk);
+    LONG bd = baselineDetourGetMessageTime.load();
+    prevcallDetourGetMessageTime.store(bd + delta);
+    return bd + delta;
 }
 
-static DWORD baselineKernelGetTickCount = 0;
-static DWORD baselineDetourGetTickCount = 0;
-static DWORD prevcallKernelGetTickCount = 0;
-static DWORD prevcallDetourGetTickCount = 0;
+static std::atomic<DWORD> baselineKernelGetTickCount = 0;
+static std::atomic<DWORD> baselineDetourGetTickCount = 0;
+static std::atomic<DWORD> prevcallKernelGetTickCount = 0;
+static std::atomic<DWORD> prevcallDetourGetTickCount = 0;
 static std::atomic<bool> shouldUpdateGetTickCount = false;
 DWORD WINAPI DetourGetTickCount(VOID)
 {
@@ -387,20 +391,22 @@ DWORD WINAPI DetourGetTickCount(VOID)
     bool expected = true;
     if (shouldUpdateGetTickCount.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetTickCount = prevcallKernelGetTickCount;
-        baselineDetourGetTickCount = prevcallDetourGetTickCount;
+        baselineKernelGetTickCount.store(prevcallKernelGetTickCount.load());
+        baselineDetourGetTickCount.store(prevcallDetourGetTickCount.load());
     }
     DWORD now = realGetTickCount();
-    prevcallKernelGetTickCount = now;
-    DWORD delta = SpeedFactor() * (now - baselineKernelGetTickCount);
-    prevcallDetourGetTickCount = baselineDetourGetTickCount + delta;
-    return baselineDetourGetTickCount + delta;
+    prevcallKernelGetTickCount.store(now);
+    DWORD bk = baselineKernelGetTickCount.load();
+    DWORD delta = SpeedFactor() * (now - bk);
+    DWORD bd = baselineDetourGetTickCount.load();
+    prevcallDetourGetTickCount.store(bd + delta);
+    return bd + delta;
 }
 
-static ULONGLONG baselineKernelGetTickCount64 = 0;
-static ULONGLONG baselineDetourGetTickCount64 = 0;
-static ULONGLONG prevcallKernelGetTickCount64 = 0;
-static ULONGLONG prevcallDetourGetTickCount64 = 0;
+static std::atomic<ULONGLONG> baselineKernelGetTickCount64 = 0;
+static std::atomic<ULONGLONG> baselineDetourGetTickCount64 = 0;
+static std::atomic<ULONGLONG> prevcallKernelGetTickCount64 = 0;
+static std::atomic<ULONGLONG> prevcallDetourGetTickCount64 = 0;
 std::atomic<bool> shouldUpdateGetTickCount64 = false;
 ULONGLONG WINAPI DetourGetTickCount64(VOID)
 {
@@ -413,20 +419,22 @@ ULONGLONG WINAPI DetourGetTickCount64(VOID)
     bool expected = true;
     if (shouldUpdateGetTickCount64.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetTickCount64 = prevcallKernelGetTickCount64;
-        baselineDetourGetTickCount64 = prevcallDetourGetTickCount64;
+        baselineKernelGetTickCount64.store(prevcallKernelGetTickCount64.load());
+        baselineDetourGetTickCount64.store(prevcallDetourGetTickCount64.load());
     }
     ULONGLONG now = realGetTickCount64();
-    prevcallKernelGetTickCount64 = now;
-    ULONGLONG delta = SpeedFactor() * (now - baselineKernelGetTickCount64);
-    prevcallDetourGetTickCount64 = baselineDetourGetTickCount64 + delta;
-    return baselineDetourGetTickCount64 + delta;
+    prevcallKernelGetTickCount64.store(now);
+    ULONGLONG bk = baselineKernelGetTickCount64.load();
+    ULONGLONG delta = SpeedFactor() * (now - bk);
+    ULONGLONG bd = baselineDetourGetTickCount64.load();
+    prevcallDetourGetTickCount64.store(bd + delta);
+    return bd + delta;
 }
 
-static LARGE_INTEGER baselineKernelQueryPerformanceCounter = { 0 };
-static LARGE_INTEGER baselineDetourQueryPerformanceCounter = { 0 };
-static LARGE_INTEGER prevcallKernelQueryPerformanceCounter = { 0 };
-static LARGE_INTEGER prevcallDetourQueryPerformanceCounter = { 0 };
+static std::atomic<LARGE_INTEGER> baselineKernelQueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> baselineDetourQueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> prevcallKernelQueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> prevcallDetourQueryPerformanceCounter{};
 static std::atomic<bool> shouldUpdateQueryPerformanceCounter = false;
 BOOL WINAPI DetourQueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
 {
@@ -445,25 +453,24 @@ BOOL WINAPI DetourQueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
     if (shouldUpdateQueryPerformanceCounter.compare_exchange_weak(expected,
                                                                   false))
     {
-        baselineKernelQueryPerformanceCounter = prevcallKernelQueryPerformanceCounter;
-        baselineDetourQueryPerformanceCounter = prevcallDetourQueryPerformanceCounter;
+        baselineKernelQueryPerformanceCounter.store(prevcallKernelQueryPerformanceCounter.load());
+        baselineDetourQueryPerformanceCounter.store(prevcallDetourQueryPerformanceCounter.load());
     }
-    BOOL rtncode = realQueryPerformanceCounter(
-        &prevcallKernelQueryPerformanceCounter);
-    if (rtncode == TRUE)
-    {
-        *lpPerformanceCount = prevcallKernelQueryPerformanceCounter;
-    }
+    LARGE_INTEGER now;
+    BOOL rtncode = realQueryPerformanceCounter(&now);
+    prevcallKernelQueryPerformanceCounter.store(now);
+    LARGE_INTEGER bkQpc = baselineKernelQueryPerformanceCounter.load();
+    LARGE_INTEGER bdQpc = baselineDetourQueryPerformanceCounter.load();
     LONGLONG delta =
-        SpeedFactor() * (lpPerformanceCount->QuadPart -
-                         baselineKernelQueryPerformanceCounter.QuadPart)
-    ;
-    lpPerformanceCount->QuadPart = baselineDetourQueryPerformanceCounter.QuadPart + delta;
-    prevcallDetourQueryPerformanceCounter = *lpPerformanceCount;
+        SpeedFactor() * (now.QuadPart - bkQpc.QuadPart);
+    LARGE_INTEGER result;
+    result.QuadPart = bdQpc.QuadPart + delta;
+    *lpPerformanceCount = result;
+    prevcallDetourQueryPerformanceCounter.store(result);
     return rtncode;
 }
 
-static LARGE_INTEGER baselineKernelQueryPerformanceFrequency = { 0 };
+static std::atomic<LARGE_INTEGER> baselineKernelQueryPerformanceFrequency{};
 BOOL WINAPI DetourQueryPerformanceFrequency(LARGE_INTEGER* lpFrequency)
 {
 
@@ -672,50 +679,62 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             return FALSE;
         }
         SP_Install();
-        /* Initial timeGetTime */
-        baselineKernelTimeGetTime = timeGetTime();
-        prevcallKernelTimeGetTime = baselineKernelTimeGetTime;
-        baselineDetourTimeGetTime = baselineKernelTimeGetTime;
-        prevcallDetourTimeGetTime = baselineKernelTimeGetTime;
+        {
+            /* Initial timeGetTime */
+            DWORD tgt = timeGetTime();
+            baselineKernelTimeGetTime.store(tgt);
+            prevcallKernelTimeGetTime.store(tgt);
+            baselineDetourTimeGetTime.store(tgt);
+            prevcallDetourTimeGetTime.store(tgt);
 
-        baselineKernelGetMessageTime = GetMessageTime();
-        prevcallKernelGetMessageTime = baselineKernelGetMessageTime;
-        baselineDetourGetMessageTime = baselineKernelGetMessageTime;
-        prevcallDetourGetMessageTime = baselineKernelGetMessageTime;
+            /* Initial GetMessageTime */
+            LONG gmt = GetMessageTime();
+            baselineKernelGetMessageTime.store(gmt);
+            prevcallKernelGetMessageTime.store(gmt);
+            baselineDetourGetMessageTime.store(gmt);
+            prevcallDetourGetMessageTime.store(gmt);
 
-        /* Initial GetTickCount */
-        baselineKernelGetTickCount = GetTickCount();
-        prevcallKernelGetTickCount = baselineKernelGetTickCount;
-        baselineDetourGetTickCount = baselineKernelGetTickCount;
-        prevcallDetourGetTickCount = baselineKernelGetTickCount;
+            /* Initial GetTickCount */
+            DWORD tck = GetTickCount();
+            baselineKernelGetTickCount.store(tck);
+            prevcallKernelGetTickCount.store(tck);
+            baselineDetourGetTickCount.store(tck);
+            prevcallDetourGetTickCount.store(tck);
 
-        baselineKernelGetTickCount64 = GetTickCount64();
-        prevcallKernelGetTickCount64 = baselineKernelGetTickCount64;
-        baselineDetourGetTickCount64 = baselineKernelGetTickCount64;
-        prevcallDetourGetTickCount64 = baselineKernelGetTickCount64;
+            /* Initial GetTickCount64 */
+            ULONGLONG tck64 = GetTickCount64();
+            baselineKernelGetTickCount64.store(tck64);
+            prevcallKernelGetTickCount64.store(tck64);
+            baselineDetourGetTickCount64.store(tck64);
+            prevcallDetourGetTickCount64.store(tck64);
 
-        /* Initial QueryPerformanceCounter */
-        QueryPerformanceCounter(&baselineKernelQueryPerformanceCounter);
-        prevcallKernelQueryPerformanceCounter = baselineKernelQueryPerformanceCounter;
-        baselineDetourQueryPerformanceCounter = baselineKernelQueryPerformanceCounter;
-        prevcallDetourQueryPerformanceCounter = baselineKernelQueryPerformanceCounter;
+            /* Initial QueryPerformanceCounter */
+            LARGE_INTEGER qpc;
+            QueryPerformanceCounter(&qpc);
+            baselineKernelQueryPerformanceCounter.store(qpc);
+            prevcallKernelQueryPerformanceCounter.store(qpc);
+            baselineDetourQueryPerformanceCounter.store(qpc);
+            prevcallDetourQueryPerformanceCounter.store(qpc);
 
-        /* Initial QueryPerformanceFrequency */
-        QueryPerformanceFrequency(&baselineKernelQueryPerformanceFrequency);
+            /* Initial QueryPerformanceFrequency */
+            LARGE_INTEGER qpf;
+            QueryPerformanceFrequency(&qpf);
+            baselineKernelQueryPerformanceFrequency.store(qpf);
 
-        /* Initial GetSystemTimeAsFileTime */
-        GetSystemTimeAsFileTime(&now);
-        baselineKernelGetSystemTimeAsFileTime.store(now);
-        prevcallKernelGetSystemTimeAsFileTime.store(now);
-        baselineDetourGetSystemTimeAsFileTime.store(now);
-        prevcallDetourGetSystemTimeAsFileTime.store(now);
+            /* Initial GetSystemTimeAsFileTime */
+            GetSystemTimeAsFileTime(&now);
+            baselineKernelGetSystemTimeAsFileTime.store(now);
+            prevcallKernelGetSystemTimeAsFileTime.store(now);
+            baselineDetourGetSystemTimeAsFileTime.store(now);
+            prevcallDetourGetSystemTimeAsFileTime.store(now);
 
-        /* Initial GetSystemTimePreciseAsFileTime */
-        GetSystemTimePreciseAsFileTime(&now);
-        baselineKernelGetSystemTimePreciseAsFileTime.store(now);
-        prevcallKernelGetSystemTimePreciseAsFileTime.store(now);
+            /* Initial GetSystemTimePreciseAsFileTime */
+            GetSystemTimePreciseAsFileTime(&now);
+            baselineKernelGetSystemTimePreciseAsFileTime.store(now);
+            prevcallKernelGetSystemTimePreciseAsFileTime.store(now);
         baselineDetourGetSystemTimePreciseAsFileTime.store(now);
         prevcallDetourGetSystemTimePreciseAsFileTime.store(now);
+        }
 
         MH_HOOK(&Sleep,
                 &DetourSleep,
