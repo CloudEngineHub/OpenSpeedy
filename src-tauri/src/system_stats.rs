@@ -1,9 +1,10 @@
 use std::os::windows::process::CommandExt;
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Mutex, OnceLock,
+    mpsc, Mutex, OnceLock,
 };
+use std::time::Duration;
 
 use serde::Serialize;
 use windows::Win32::Foundation::FILETIME;
@@ -102,6 +103,8 @@ fn gpu_stats() -> Option<GpuStats> {
     native.or_else(nvidia_smi_gpu_stats)
 }
 
+const NVIDIA_SMI_TIMEOUT: Duration = Duration::from_secs(1);
+
 fn nvidia_smi_gpu_stats() -> Option<GpuStats> {
     if NVIDIA_SMI_UNAVAILABLE.load(Ordering::Acquire) {
         return None;
@@ -112,18 +115,27 @@ fn nvidia_smi_gpu_stats() -> Option<GpuStats> {
         return None;
     }
 
-    let mut command = Command::new("nvidia-smi");
-    command.creation_flags(CREATE_NO_WINDOW);
-    let stats = command
-        .args([
-            "--query-gpu=name,memory.used,memory.total",
-            "--format=csv,noheader,nounits",
-            "--id=0",
-        ])
-        .output()
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        let result = Command::new("nvidia-smi")
+            .creation_flags(CREATE_NO_WINDOW)
+            .args([
+                "--query-gpu=name,memory.used,memory.total",
+                "--format=csv,noheader,nounits",
+                "--id=0",
+            ])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .output();
+        let _ = tx.send(result);
+    });
+
+    let stats = rx
+        .recv_timeout(NVIDIA_SMI_TIMEOUT)
         .ok()
-        .filter(|output| output.status.success())
-        .and_then(|output| parse_nvidia_smi_output(&output.stdout));
+        .and_then(|r| r.ok())
+        .filter(|o| o.status.success())
+        .and_then(|o| parse_nvidia_smi_output(&o.stdout));
 
     if stats.is_none() {
         NVIDIA_SMI_UNAVAILABLE.store(true, Ordering::Release);
