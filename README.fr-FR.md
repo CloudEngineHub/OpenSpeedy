@@ -51,6 +51,16 @@
   <img src="https://img.shields.io/badge/License-GPLv3-green.svg?style=for-the-badge">
   <br/>
 
+  <p align="center">
+    <a href="https://www.star-history.com/game1024/openspeedy">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=game1024/OpenSpeedy&theme=dark" />
+        <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=game1024/OpenSpeedy" />
+        <img alt="Star History Rank" src="https://api.star-history.com/badge?repo=game1024/OpenSpeedy" />
+      </picture>
+    </a>
+  </p>
+
   <a href="https://hellogithub.com/repository/975f473c56ad4369a1c30ac9aa5819e0" target="_blank">
     <img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=975f473c56ad4369a1c30ac9aa5819e0&claim_uid=kmUCncHJr9SpNV7&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" />
   </a>
@@ -166,6 +176,4 @@ Avertissement : OpenSpeedy est destiné uniquement à des fins éducatives et de
 </a>
 
 
-<p align="center">
-  <img src="https://api.star-history.com/svg?repos=game1024/openspeedy&type=Date" Alt="Star History Chart">
-</p>
+[![Star History Chart](https://api.star-history.com/chart?repos=game1024/openspeedy&type=date&legend=top-left&sealed_token=43EFqixAdnjjYvvGNGzLo2xaQ6pxiw-PB5c4esf0x1me4mggQ04N_UBbscSxq9AfJRKX5tSZ5KEvIC_0DvMycAN_IZBS2T-AYT1o1PvQJsEsWqu4wDDb8bcA-ta9bFIz3jUWp6Z0K6YegzonrQbjJIFn2iw8-m2uzQIO5MAAJi8XF_zMQx3NDaLxTP8j)](https://www.star-history.com/?repos=game1024%2Fopenspeedy&type=date&legend=top-left)
