@@ -23,6 +23,7 @@ export interface SettingsState {
   holdShortcut: string;
   holdSpeed: number;
 
+  theme: "light" | "dark";
   autoStart: boolean;
   alwaysOnTop: boolean;
   language: "zh-CN" | "zh-TW" | "ja-JP" | "ko-KR" | "de-DE" | "fr-FR" | "en-US";
@@ -52,6 +53,7 @@ export const DEFAULTS: SettingsState = {
   holdShortcut: "",
   holdSpeed: 2.0,
 
+  theme: "light" as const,
   autoStart: false,
   alwaysOnTop: false,
   language: "zh-CN" as const,

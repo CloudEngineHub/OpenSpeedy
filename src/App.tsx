@@ -15,6 +15,7 @@ import ProcessManager from "./components/ProcessManager";
 import SettingsManager from "./components/SettingsManager";
 import { useShortcut } from "./hooks/useShortcut";
 import { useTray } from "./hooks/useTray";
+import { useSettings } from "./hooks/useSettings";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
 
 import { useInterval } from "ahooks";
@@ -33,7 +34,8 @@ function App() {
   const [gpuName, setGpuName] = useState("");
   const [gpuUsedMb, setGpuUsedMb] = useState(0);
   const [gpuTotalMb, setGpuTotalMb] = useState(0);
-  const [darkMode, setDarkMode] = useState(false);
+  const { settings, set } = useSettings();
+  const darkMode = settings?.theme === "dark";
 
   // Sync Blueprint dark mode class
   useEffect(() => {
@@ -121,7 +123,7 @@ function App() {
 
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", pb: 1 }}>
               {darkMode ? <DarkModeIcon sx={{ fontSize: 14, color: "text.secondary" }} /> : <LightModeIcon sx={{ fontSize: 14, color: "text.secondary" }} />}
-              <Switch size="small" checked={darkMode} onChange={(_, v) => setDarkMode(v)} />
+              <Switch size="small" checked={darkMode} onChange={(_, v) => set("theme", v ? "dark" : "light")} />
             </Box>
           </Box>
 

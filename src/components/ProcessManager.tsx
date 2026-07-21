@@ -29,7 +29,15 @@ interface ProcessInfo {
 }
 
 const ROW_H = 42;
-const COL = { pid: 72, check: 60 } as const;
+const COL = { pid: 72, mem: 80, check: 80 } as const;
+
+type SortCol = "pid" | "name" | "memory" | "enabled" | "count" | null;
+
+function formatMem(kb: number): string {
+  if (kb >= 1024 * 1024) return `${(kb / (1024 * 1024)).toFixed(1)} GB`;
+  if (kb >= 1024) return `${(kb / 1024).toFixed(0)} MB`;
+  return `${kb} KB`;
+}
 
 function ProcessIcon({ pid, icons }: { pid: number; icons: Record<number, string> }) {
   const src = icons[pid];
@@ -44,17 +52,21 @@ function ProcessIcon({ pid, icons }: { pid: number; icons: Record<number, string
 // ── Memoized process table (isolated from speed state) ───────────────────
 
 const ProcessRow = React.memo(function ProcessRow({
-  p, on, icons, start, selected, onToggle, onSelect,
+  p, on, icons, start, selected, showMem, onToggle, onSelect,
 }: {
   p: ProcessInfo; on: boolean; icons: Record<number, string>; start: number; selected: boolean;
+  showMem: boolean;
   onToggle: (pid: number, arch: string) => void;
   onSelect: (pid: number) => void;
 }) {
+  const cols = showMem
+    ? `${COL.pid}px 1fr ${COL.mem}px ${COL.check}px`
+    : `${COL.pid}px 1fr ${COL.check}px`;
   return (
     <Box
       onClick={() => onSelect(p.pid)}
       sx={{
-        display: "grid", gridTemplateColumns: `${COL.pid}px 1fr ${COL.check}px`,
+        display: "grid", gridTemplateColumns: cols,
         position: "absolute", top: 0, left: 0, right: 0, height: ROW_H, transform: `translateY(${start}px)`,
         alignItems: "center", borderBottom: 1, borderColor: "divider", cursor: "pointer",
         bgcolor: selected ? "rgba(92,107,192,0.12)" : on ? "action.selected" : "transparent",
@@ -69,11 +81,12 @@ const ProcessRow = React.memo(function ProcessRow({
           {p.window_title && <Typography variant="caption" noWrap sx={{ color: "text.disabled", display: "block", lineHeight: 1.2 }}>{p.window_title}</Typography>}
         </Box>
       </Box>
+      {showMem && <Typography variant="body2" color="text.secondary" sx={{ textAlign: "right", pr: 1 }}>{formatMem(p.memory_kb)}</Typography>}
       <Box sx={{ textAlign: "center" }}><Switch size="small" checked={on} onChange={() => onToggle(p.pid, p.arch)} /></Box>
     </Box>
   );
 }, (prev, next) =>
-  prev.p.pid === next.p.pid && prev.on === next.on && prev.start === next.start && prev.selected === next.selected
+  prev.p.pid === next.p.pid && prev.on === next.on && prev.start === next.start && prev.selected === next.selected && prev.showMem === next.showMem
 );
 
 const ProcessTable = function ProcessTable({
@@ -99,10 +112,57 @@ const ProcessTable = function ProcessTable({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const isPid = tab === 0;
-  const items = isPid ? filtered.length : nameFiltered.length;
+
+  // ── Sorting ──────────────────────────────────────────────────────────
+  const [sortCol, setSortCol] = useState<SortCol>(isPid ? "enabled" : null);
+  const [sortAsc, setSortAsc] = useState(false);
+
+  // Default: isPid mode sorts by enabled (accelerated on top)
+  useEffect(() => { setSortCol(isPid ? "enabled" : null); setSortAsc(false); }, [tab]);
+
+  function toggleSort(col: SortCol) {
+    if (sortCol === col) { setSortAsc(!sortAsc); } else { setSortCol(col); setSortAsc(true); }
+  }
+  function sortIcon(col: SortCol) {
+    if (sortCol !== col) return "";
+    return sortAsc ? " ▲" : " ▼";
+  }
+
+  const sorted = useMemo(() => {
+    const list = isPid ? [...filtered] : [...nameFiltered];
+    if (!sortCol) return list;
+    list.sort((a, b) => {
+      let cmp = 0;
+      if (isPid) {
+        const pa = a as ProcessInfo, pb = b as ProcessInfo;
+        switch (sortCol) {
+          case "pid": cmp = pa.pid - pb.pid; break;
+          case "name": cmp = pa.name.localeCompare(pb.name); break;
+          case "memory": cmp = pa.memory_kb - pb.memory_kb; break;
+          case "enabled": cmp = (enabled.has(pa.pid) ? 1 : 0) - (enabled.has(pb.pid) ? 1 : 0); break;
+        }
+      } else {
+        const ga = a as [string, { count: number; arch: string; pids: number[]; anyEnabled: boolean }];
+        const gb = b as [string, { count: number; arch: string; pids: number[]; anyEnabled: boolean }];
+        switch (sortCol) {
+          case "count": cmp = ga[1].count - gb[1].count; break;
+          case "name": cmp = ga[0].localeCompare(gb[0]); break;
+          case "enabled": cmp = (ga[1].anyEnabled ? 1 : 0) - (gb[1].anyEnabled ? 1 : 0); break;
+        }
+      }
+      return sortAsc ? cmp : -cmp;
+    });
+    return list;
+  }, [isPid, filtered, nameFiltered, sortCol, sortAsc, enabled]);
+
+  const items = isPid ? sorted.length : sorted.length;
   const total = isPid ? processes.length : nameGroups.size;
 
   const vz = useVirtualizer({ count: items, getScrollElement: () => scrollRef.current!, estimateSize: () => ROW_H, overscan: 12 });
+
+  const gridCols = isPid
+    ? `${COL.pid}px 1fr ${COL.mem}px ${COL.check}px`
+    : `${COL.pid}px 1fr ${COL.check}px`;
 
   return (
     <Paper elevation={0} sx={{ height: "100%", bgcolor: "background.paper", border: 1, borderColor: "divider", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -119,34 +179,40 @@ const ProcessTable = function ProcessTable({
       </Box>
 
       <Box sx={{ px: 2, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-        <TextField placeholder={t("process.search")} variant="outlined" size="small" fullWidth value={search} onChange={e => onSearch(e.target.value)} />
+        <TextField placeholder={t("process.search")} variant="outlined" size="small" fullWidth value={search} onChange={e => onSearch(e.target.value)} slotProps={{ htmlInput: { autoComplete: "off" } }} />
       </Box>
       <Divider />
 
       <Box sx={{ px: 2, flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <Table size="small" sx={{ tableLayout: "fixed", flexShrink: 0 }}>
-          <colgroup><col width={COL.pid} /><col /><col width={COL.check} /></colgroup>
+          <colgroup>
+            <col width={COL.pid} /><col />
+            {isPid && <col width={COL.mem} />}
+            <col width={COL.check} />
+          </colgroup>
           <TableHead><TableRow>
-            <TableCell>{isPid ? t("process.pid") : t("process.count")}</TableCell>
-            <TableCell>{t("process.name")}</TableCell>
-            <TableCell align="center">{t("process.enable")}</TableCell>
+            <TableCell onClick={() => toggleSort(isPid ? "pid" : "count")} sx={{ cursor: "pointer", userSelect: "none" }}>{isPid ? t("process.pid") : t("process.count")}{sortIcon(isPid ? "pid" : "count")}</TableCell>
+            <TableCell onClick={() => toggleSort("name")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.name")}{sortIcon("name")}</TableCell>
+            {isPid && <TableCell onClick={() => toggleSort("memory")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.memory")}{sortIcon("memory")}</TableCell>}
+            <TableCell align="center" onClick={() => toggleSort("enabled")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.enable")}{sortIcon("enabled")}</TableCell>
           </TableRow></TableHead>
         </Table>
 
         <Box ref={scrollRef} sx={{ flex: 1, overflow: "auto", position: "relative" }}>
           <div style={{ height: vz.getTotalSize(), width: 1 }} />
           {isPid
-            ? vz.getVirtualItems().map(vr => (
-                <ProcessRow key={filtered[vr.index].pid} p={filtered[vr.index]} on={enabled.has(filtered[vr.index].pid)} icons={icons} start={vr.start} selected={selectedPid === filtered[vr.index].pid} onToggle={onToggle} onSelect={onSelect} />
-              ))
+            ? vz.getVirtualItems().map(vr => {
+                const p = (sorted as ProcessInfo[])[vr.index];
+                return <ProcessRow key={p.pid} p={p} on={enabled.has(p.pid)} icons={icons} start={vr.start} selected={selectedPid === p.pid} showMem={true} onToggle={onToggle} onSelect={onSelect} />;
+              })
             : vz.getVirtualItems().map(vr => {
-                const [name, group] = nameFiltered[vr.index];
+                const [name, group] = (sorted as [string, { count: number; arch: string; pids: number[]; anyEnabled: boolean }][])[vr.index];
                 return (
                   <Box
                     key={name}
                     onClick={() => onSelect(group.pids[0])}
                     sx={{
-                      display: "grid", gridTemplateColumns: `${COL.pid}px 1fr ${COL.check}px`,
+                      display: "grid", gridTemplateColumns: gridCols,
                       position: "absolute", top: 0, left: 0, right: 0, height: ROW_H, transform: `translateY(${vr.start}px)`,
                       alignItems: "center", borderBottom: 1, borderColor: "divider", cursor: "pointer",
                       bgcolor: selectedPid !== null && group.pids.includes(selectedPid) ? "rgba(92,107,192,0.12)" : group.anyEnabled ? "action.selected" : "transparent",
@@ -224,7 +290,7 @@ export default function ProcessManager() {
   // Data fetch
   useEffect(() => { invoke<ProcessInfo[]>("get_process_list").then(setProcesses).catch(() => {}); }, []);
   useEffect(() => { if (search.trim()) { invoke<ProcessInfo[]>("get_process_list").then(setProcesses).catch(() => {}); } }, [search]);
-  useInterval(async () => { try { setProcesses(await invoke<ProcessInfo[]>("get_process_list_fast")); } catch {} }, 3000);
+  useInterval(async () => { try { setProcesses(await invoke<ProcessInfo[]>("get_process_list_fast")); } catch {} }, 1000);
 
   // Periodically inject saved process names
   useInterval(async () => {

@@ -248,8 +248,8 @@ pub fn enumerate_processes_fast() -> Vec<ProcessInfo> {
                         pid,
                         name,
                         arch,
-                        window_title: None,
-                        memory_kb: 0,
+                        window_title: find_window_title(pid),
+                        memory_kb: get_memory_kb(pid),
                         exe_path,
                         admin,
                     });
