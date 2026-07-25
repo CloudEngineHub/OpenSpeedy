@@ -24,6 +24,8 @@
     "store:default",
     "shell:default",
     "shell:allow-open",
+    "os:default",
+    "os:allow-locale",
     "core:app:allow-default-window-icon"
   ]
 }

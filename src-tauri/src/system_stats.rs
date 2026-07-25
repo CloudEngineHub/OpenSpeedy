@@ -64,7 +64,7 @@ fn os_version() -> String {
             };
             format!("{name} ({})", vi.dwBuildNumber)
         } else {
-            "Windows".into()
+            String::from("Windows")
         }
     })
     .clone()

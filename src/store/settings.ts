@@ -56,13 +56,15 @@ export const DEFAULTS: SettingsState = {
   theme: "light" as const,
   autoStart: false,
   alwaysOnTop: false,
-  language: "zh-CN" as const,
+  language: "en-US" as const,
   speed: 1.0,
 };
 
 // ── Store (singleton) ─────────────────────────────────────────────────────
 
 import { Store } from "@tauri-apps/plugin-store";
+import { locale } from "@tauri-apps/plugin-os";
+import { mapSystemLocale } from "../i18n";
 
 let _store: Store | null = null;
 
@@ -74,13 +76,28 @@ async function getStore() {
 export async function loadSettings(): Promise<SettingsState> {
   const store = await getStore();
   const saved = await store.get<SettingsState>("settings");
-  return { ...DEFAULTS, ...saved } as SettingsState;
+  const merged = { ...DEFAULTS, ...saved } as SettingsState;
+
+  // If user has never set a language, use the OS locale
+  if (!saved?.language) {
+    const sysLocale = await locale();
+    merged.language = mapSystemLocale(sysLocale) as SettingsState["language"];
+  }
+
+  return merged;
 }
 
 export async function getSetting<K extends keyof SettingsState>(key: K): Promise<SettingsState[K]> {
   const store = await getStore();
   const saved = await store.get<SettingsState>("settings");
   const merged = { ...DEFAULTS, ...saved } as SettingsState;
+
+  // If user has never set a language, use the OS locale
+  if (!saved?.language) {
+    const sysLocale = await locale();
+    merged.language = mapSystemLocale(sysLocale) as SettingsState["language"];
+  }
+
   return merged[key];
 }
 

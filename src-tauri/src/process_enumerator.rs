@@ -24,7 +24,11 @@ use windows::Win32::System::Threading::{
 use windows::Win32::Security::{
     GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY,
 };
-use windows::Win32::UI::Shell::ExtractIconExW;
+use windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES;
+use windows::Win32::UI::Shell::{
+    SHGetFileInfoW, SHGetImageList, SHFILEINFOW, SHGFI_SYSICONINDEX, SHIL_JUMBO,
+};
+use windows::Win32::UI::Controls::IImageList;
 use windows::Win32::UI::WindowsAndMessaging::{
     DestroyIcon, DrawIconEx, EnumWindows, GetWindowTextLengthW, GetWindowTextW,
     GetWindowThreadProcessId, IsWindowVisible, DI_NORMAL,
@@ -385,24 +389,34 @@ fn get_exe_path(pid: u32) -> Option<String> {
 fn extract_icon_base64(exe_path: &str) -> Option<String> {
     let exe_wide: Vec<u16> = exe_path.encode_utf16().chain(std::iter::once(0)).collect();
 
-    let mut small_icon = Default::default();
-
-    let count = unsafe {
-        ExtractIconExW(
+    // Get the system image list icon index for this file
+    let mut sfi = SHFILEINFOW::default();
+    let result = unsafe {
+        SHGetFileInfoW(
             windows::core::PCWSTR(exe_wide.as_ptr()),
-            0,
-            None,
-            Some(&mut small_icon),
-            1,
+            FILE_FLAGS_AND_ATTRIBUTES::default(),
+            Some(&mut sfi),
+            std::mem::size_of::<SHFILEINFOW>() as u32,
+            SHGFI_SYSICONINDEX,
         )
     };
 
-    if count == 0 || small_icon.is_invalid() {
+    if result == 0 {
         return None;
     }
 
-    let icon_data = icon_to_png_data(small_icon);
-    let _ = unsafe { DestroyIcon(small_icon) };
+    // Get the JUMBO (256x256) image list
+    let imagelist: IImageList = unsafe { SHGetImageList(SHIL_JUMBO as i32).ok()? };
+
+    // Extract the icon with ILD_TRANSPARENT (1) for alpha-aware result
+    let hicon = unsafe { imagelist.GetIcon(sfi.iIcon as i32, 1).ok()? };
+
+    if hicon.is_invalid() {
+        return None;
+    }
+
+    let icon_data = icon_to_png_data(hicon);
+    let _ = unsafe { DestroyIcon(hicon) };
 
     icon_data
 }
@@ -412,7 +426,7 @@ fn extract_icon_base64(exe_path: &str) -> Option<String> {
 fn icon_to_png_data(
     hicon: windows::Win32::UI::WindowsAndMessaging::HICON,
 ) -> Option<String> {
-    const ICON_SIZE: i32 = 24;
+    const ICON_SIZE: i32 = 64;
 
     // Create screen-compatible DC
     let hdc_screen = unsafe { CreateCompatibleDC(None) };

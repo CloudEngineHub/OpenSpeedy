@@ -28,8 +28,8 @@ interface ProcessInfo {
   admin: boolean;
 }
 
-const ROW_H = 42;
-const COL = { pid: 72, mem: 80, check: 80 } as const;
+const ROW_H = 36;
+const COL = { pid: 64, mem: 80, check: 80 } as const;
 
 type SortCol = "pid" | "name" | "memory" | "enabled" | "count" | null;
 
@@ -73,15 +73,15 @@ const ProcessRow = React.memo(function ProcessRow({
         "&:hover": { bgcolor: selected ? "rgba(92,107,192,0.18)" : on ? "action.selected" : "action.hover" },
       }}
     >
-      <Typography variant="body2" color="text.secondary">{p.pid}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem" }}>{p.pid}</Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, minWidth: 0 }}>
         <ProcessIcon pid={p.pid} icons={icons} />
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{p.name}</Typography>
-          {p.window_title && <Typography variant="caption" noWrap sx={{ color: "text.disabled", display: "block", lineHeight: 1.2 }}>{p.window_title}</Typography>}
+          <Typography variant="body2" noWrap sx={{ fontWeight: 500, fontSize: "0.8rem" }}>{p.name}</Typography>
+          {p.window_title && <Typography variant="caption" noWrap sx={{ color: "text.disabled", display: "block", lineHeight: 1.2, fontSize: "0.65rem" }}>{p.window_title}</Typography>}
         </Box>
       </Box>
-      {showMem && <Typography variant="body2" color="text.secondary" sx={{ textAlign: "right", pr: 1 }}>{formatMem(p.memory_kb)}</Typography>}
+      {showMem && <Typography variant="body2" color="text.secondary" sx={{ textAlign: "right", pr: 1, fontSize: "0.8rem" }}>{formatMem(p.memory_kb)}</Typography>}
       <Box sx={{ textAlign: "center" }}><Switch size="small" checked={on} onChange={() => onToggle(p.pid, p.arch)} /></Box>
     </Box>
   );
@@ -191,10 +191,10 @@ const ProcessTable = function ProcessTable({
             <col width={COL.check} />
           </colgroup>
           <TableHead><TableRow>
-            <TableCell onClick={() => toggleSort(isPid ? "pid" : "count")} sx={{ cursor: "pointer", userSelect: "none" }}>{isPid ? t("process.pid") : t("process.count")}{sortIcon(isPid ? "pid" : "count")}</TableCell>
-            <TableCell onClick={() => toggleSort("name")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.name")}{sortIcon("name")}</TableCell>
-            {isPid && <TableCell onClick={() => toggleSort("memory")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.memory")}{sortIcon("memory")}</TableCell>}
-            <TableCell align="center" onClick={() => toggleSort("enabled")} sx={{ cursor: "pointer", userSelect: "none" }}>{t("process.enable")}{sortIcon("enabled")}</TableCell>
+            <TableCell onClick={() => toggleSort(isPid ? "pid" : "count")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{isPid ? t("process.pid") : t("process.count")}{sortIcon(isPid ? "pid" : "count")}</TableCell>
+            <TableCell onClick={() => toggleSort("name")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.name")}{sortIcon("name")}</TableCell>
+            {isPid && <TableCell onClick={() => toggleSort("memory")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.memory")}{sortIcon("memory")}</TableCell>}
+            <TableCell align="center" onClick={() => toggleSort("enabled")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.enable")}{sortIcon("enabled")}</TableCell>
           </TableRow></TableHead>
         </Table>
 
@@ -219,11 +219,11 @@ const ProcessTable = function ProcessTable({
                       "&:hover": { bgcolor: "action.hover" },
                     }}
                   >
-                    <Typography variant="body2" color="text.secondary">{group.count}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem" }}>{group.count}</Typography>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, minWidth: 0 }}>
                       <ProcessIcon pid={group.pids[0]} icons={icons} />
                       <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{name}</Typography>
+                        <Typography variant="body2" noWrap sx={{ fontWeight: 500, fontSize: "0.8rem" }}>{name}</Typography>
                       </Box>
                     </Box>
                     <Box sx={{ textAlign: "center" }}><Switch size="small" checked={group.anyEnabled} onChange={() => onToggleName(name)} /></Box>
