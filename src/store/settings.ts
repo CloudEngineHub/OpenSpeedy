@@ -26,7 +26,7 @@ export interface SettingsState {
   theme: "light" | "dark";
   autoStart: boolean;
   alwaysOnTop: boolean;
-  language: "zh-CN" | "zh-TW" | "ja-JP" | "ko-KR" | "de-DE" | "fr-FR" | "en-US";
+  language: "zh-CN" | "zh-TW" | "ja-JP" | "ko-KR" | "de-DE" | "fr-FR" | "en-US" | "ru-RU" | "hi-IN" | "de-CH" | "nl-NL" | "pt-BR" | "es-ES";
   speed: number;
 }
 

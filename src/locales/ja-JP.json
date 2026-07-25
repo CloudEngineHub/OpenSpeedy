@@ -1,4 +1,8 @@
 {
+  "tray": {
+    "show": "ウィンドウを表示",
+    "quit": "終了"
+  },
   "app": {
     "title": "OpenSpeedy",
     "tabs": {
@@ -20,7 +24,7 @@
     "normal": "通常",
     "reset": "リセット",
     "confirm": "確認",
-    "cancel": "取消"
+    "cancel": "キャンセル"
   },
   "process": {
     "title": "システムプロセス",
@@ -30,6 +34,9 @@
     "admin": "権限",
     "arch": "アーキテクチャ",
     "memory": "メモリ",
+    "byPid": "PID",
+    "byName": "名前",
+    "count": "件数",
     "enable": "加速",
     "loading": "プロセスリストを読み込み中…",
     "noResults": "一致するプロセスがありません",
@@ -62,6 +69,9 @@
       "modulesCount": "{{count}} モジュール"
     }
   },
+  "shortcut": {
+    "notSet": "未設定"
+  },
   "settings": {
     "loading": "設定を読み込み中…",
     "speedShortcuts": "速度ショートカット",
@@ -71,9 +81,9 @@
     "decrease": "減速",
     "reset": "リセット",
     "confirm": "確認",
-    "cancel": "取消",
+    "cancel": "キャンセル",
     "gears": "ギアプリセット",
-    "hold": "按住",
+    "hold": "長押し",
     "gear": "ギア",
     "multiplier": "倍率",
     "general": "一般設定",
@@ -83,13 +93,12 @@
     "registerSuccess": "ショートカット \"{{shortcut}}\" 登録成功",
     "registerFail": "ショートカット \"{{shortcut}}\" 登録失敗"
   },
-  "shortcut": {
-    "notSet": "未設定"
-  },
   "about": {
     "title": "OpenSpeedy",
     "description": "オープンソースゲーム速度コントローラー",
     "author": "作者",
-    "license": "ライセンス"
+    "license": "ライセンス",
+    "version": "バージョン",
+    "system": "システム"
   }
 }

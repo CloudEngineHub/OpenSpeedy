@@ -65,7 +65,7 @@
       "moduleName": "Modulname",
       "modulePath": "Pfad",
       "moduleBase": "Basisadresse",
-      "moduleSize": "Größe",
+      "moduleSize": "Grösse",
       "modulesCount": "{{count}} Module"
     }
   },
@@ -74,14 +74,12 @@
   },
   "settings": {
     "loading": "Einstellungen laden…",
-    "speedShortcuts": "Tastenkürzel",
-    "shortcut": "Kürzel",
+    "speedShortcuts": "Tastenkombinationen",
+    "shortcut": "Kombination",
     "step": "Schritt",
     "increase": "Erhöhen",
     "decrease": "Verringern",
     "reset": "Zurücksetzen",
-    "confirm": "OK",
-    "cancel": "Abbrechen",
     "gears": "Gang-Voreinstellungen",
     "hold": "Halten",
     "gear": "Gang",
@@ -90,8 +88,8 @@
     "autoStart": "Autostart",
     "alwaysOnTop": "Immer im Vordergrund",
     "language": "Sprache",
-    "registerSuccess": "Kürzel \"{{shortcut}}\" registriert",
-    "registerFail": "Kürzel \"{{shortcut}}\" fehlgeschlagen"
+    "registerSuccess": "Kombination \"{{shortcut}}\" registriert",
+    "registerFail": "Kombination \"{{shortcut}}\" fehlgeschlagen"
   },
   "about": {
     "title": "OpenSpeedy",

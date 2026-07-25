@@ -238,14 +238,20 @@ export default function SettingsManager() {
           }} />
         </Row>
         <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><LanguageIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.language")}</Box>}>
-          <Select size="small" value={settings.language} onChange={e => { const lng = e.target.value as "zh-CN" | "en-US"; set("language", lng); i18n.changeLanguage(lng); }} sx={{ minWidth: 100 }}>
+          <Select size="small" value={settings.language} onChange={e => { const lng = e.target.value as SettingsState["language"]; set("language", lng); i18n.changeLanguage(lng); }} sx={{ minWidth: 140 }}>
             <MenuItem value="zh-CN">中文（简体）</MenuItem>
             <MenuItem value="zh-TW">中文（繁體）</MenuItem>
+            <MenuItem value="en-US">English</MenuItem>
             <MenuItem value="ja-JP">日本語</MenuItem>
             <MenuItem value="ko-KR">한국어</MenuItem>
             <MenuItem value="de-DE">Deutsch</MenuItem>
+            <MenuItem value="de-CH">Deutsch (CH)</MenuItem>
             <MenuItem value="fr-FR">Français</MenuItem>
-            <MenuItem value="en-US">English</MenuItem>
+            <MenuItem value="nl-NL">Nederlands</MenuItem>
+            <MenuItem value="es-ES">Español</MenuItem>
+            <MenuItem value="pt-BR">Português (BR)</MenuItem>
+            <MenuItem value="ru-RU">Русский</MenuItem>
+            <MenuItem value="hi-IN">हिन्दी</MenuItem>
           </Select>
         </Row>
 

@@ -7,6 +7,12 @@ import koKR from "./locales/ko-KR.json";
 import deDE from "./locales/de-DE.json";
 import frFR from "./locales/fr-FR.json";
 import enUS from "./locales/en-US.json";
+import ruRU from "./locales/ru-RU.json";
+import hiIN from "./locales/hi-IN.json";
+import deCH from "./locales/de-CH.json";
+import nlNL from "./locales/nl-NL.json";
+import ptBR from "./locales/pt-BR.json";
+import esES from "./locales/es-ES.json";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -17,6 +23,12 @@ i18n.use(initReactI18next).init({
     "de-DE": { translation: deDE },
     "fr-FR": { translation: frFR },
     "en-US": { translation: enUS },
+    "ru-RU": { translation: ruRU },
+    "hi-IN": { translation: hiIN },
+    "de-CH": { translation: deCH },
+    "nl-NL": { translation: nlNL },
+    "pt-BR": { translation: ptBR },
+    "es-ES": { translation: esES },
   },
   lng: "zh-CN",
   fallbackLng: "zh-CN",

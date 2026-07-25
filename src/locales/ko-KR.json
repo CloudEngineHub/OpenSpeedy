@@ -1,4 +1,8 @@
 {
+  "tray": {
+    "show": "창 표시",
+    "quit": "종료"
+  },
   "app": {
     "title": "OpenSpeedy",
     "tabs": {
@@ -30,6 +34,9 @@
     "admin": "권한",
     "arch": "아키텍처",
     "memory": "메모리",
+    "byPid": "PID",
+    "byName": "이름",
+    "count": "개수",
     "enable": "가속",
     "loading": "프로세스 목록 로딩 중…",
     "noResults": "일치하는 프로세스 없음",
@@ -62,6 +69,9 @@
       "modulesCount": "{{count}}개 모듈"
     }
   },
+  "shortcut": {
+    "notSet": "설정 안 됨"
+  },
   "settings": {
     "loading": "설정 로딩 중…",
     "speedShortcuts": "속도 단축키",
@@ -73,7 +83,7 @@
     "confirm": "확인",
     "cancel": "취소",
     "gears": "기어 프리셋",
-    "hold": "按住",
+    "hold": "길게 누르기",
     "gear": "기어",
     "multiplier": "배율",
     "general": "일반 설정",
@@ -83,13 +93,12 @@
     "registerSuccess": "단축키 \"{{shortcut}}\" 등록 성공",
     "registerFail": "단축키 \"{{shortcut}}\" 등록 실패"
   },
-  "shortcut": {
-    "notSet": "설정 안 됨"
-  },
   "about": {
     "title": "OpenSpeedy",
     "description": "오픈소스 게임 속도 컨트롤러",
     "author": "제작자",
-    "license": "라이선스"
+    "license": "라이선스",
+    "version": "버전",
+    "system": "시스템"
   }
 }

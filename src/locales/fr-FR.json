@@ -22,7 +22,7 @@
     "slow": "RALENTI",
     "fast": "RAPIDE",
     "normal": "Normal",
-    "reset": "Réinit.",
+    "reset": "Réinitialiser",
     "confirm": "OK",
     "cancel": "Annuler"
   },
@@ -31,13 +31,16 @@
     "search": "Rechercher par nom, PID ou titre de fenêtre…",
     "pid": "PID",
     "name": "Nom du processus",
-    "admin": "Droits",
-    "arch": "Arch",
+    "admin": "Admin",
+    "arch": "Architecture",
     "memory": "Mémoire",
+    "byPid": "PID",
+    "byName": "Nom",
+    "count": "Nombre",
     "enable": "Vitesse",
     "loading": "Chargement des processus…",
     "noResults": "Aucun processus correspondant",
-    "injectFail": "Échec de l'injection, exécutez en tant qu'administrateur",
+    "injectFail": "Échec de l'injection – exécutez en tant qu'administrateur",
     "enableFail": "Échec de l'activation",
     "disableFail": "Échec de la désactivation",
     "detail": {
@@ -66,6 +69,9 @@
       "modulesCount": "{{count}} modules"
     }
   },
+  "shortcut": {
+    "notSet": "Non défini"
+  },
   "settings": {
     "loading": "Chargement des paramètres…",
     "speedShortcuts": "Raccourcis de Vitesse",
@@ -76,9 +82,9 @@
     "reset": "Réinitialiser",
     "confirm": "OK",
     "cancel": "Annuler",
-    "gears": "Préréglages",
-    "hold": "Hold",
-    "gear": "Préréglage",
+    "gears": "Préréglages de Vitesse",
+    "hold": "Maintenir",
+    "gear": "Rapport",
     "multiplier": "Multiplicateur",
     "general": "Général",
     "autoStart": "Démarrage Auto",
@@ -86,9 +92,6 @@
     "language": "Langue",
     "registerSuccess": "Raccourci \"{{shortcut}}\" enregistré",
     "registerFail": "Échec de l'enregistrement de \"{{shortcut}}\""
-  },
-  "shortcut": {
-    "notSet": "Non défini"
   },
   "about": {
     "title": "OpenSpeedy",
