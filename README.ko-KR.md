@@ -77,7 +77,8 @@
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ko-KR.md">한국어</a> |
-  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.pt-BR.md">Português (BR)</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.pt-BR.md">Português (BR)</a>
+  <br/> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ru-RU.md">Русский</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.es-ES.md">Español</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.nl-NL.md">Nederlands</a> |
