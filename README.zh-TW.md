@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  The Best Open-Source Game Speed Controller
+  最好用的開源遊戲變速器
 </p>
 
 <p align="center">
@@ -45,7 +45,7 @@
   <br/>
   
   <a href="https://github.com/game1024/OpenSpeedy/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="Commit Activity">
+    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="提交活躍度">
   </a>
   <img src="https://img.shields.io/badge/language-C/C++-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/License-GPLv3-green.svg?style=for-the-badge">
@@ -87,99 +87,99 @@
 </p>
 
 
-# 🚀 Features
-- Quick speed adjustment
-- Modern UI
-- Supports both x86 and x64 platform processes
-- No kernel intrusion — Ring-3 level hooking, does not tamper with the system kernel
+# 🚀 特性
+- 快速變速
+- 現代化 UI
+- 同時支援 x86 和 x64 平台處理程序
+- 無核心侵入性，Ring3 層 Hook，不破壞系統核心
 
 
-# 💾 Installation
-📦 **Method 1: Winget**
+# 💾 安裝
+📦 **方式一：Winget**
 
 ``` powershell
-# Install command
+# 安裝指令如下
 winget install openspeedy
 
-# Open a new terminal and run openspeedy
+# 開啟一個新的終端機，執行 openspeedy
 openspeedy
 ```
 
-📥 **Method 2: Manual Download**
+📥 **方式二：手動下載**
 
-Visit the [Releases page](https://github.com/game1024/OpenSpeedy/releases) to download the latest version.
-
-
-# 💻 System Requirements
-- OS: Windows 10 or later
-- Platform: x86 (32-bit) and x64 (64-bit)
+前往[安裝頁面](https://github.com/game1024/OpenSpeedy/releases)下載最新版本
 
 
-# 📝 Usage
-1. Launch OpenSpeedy
-2. Run the target game you want to speed up
+# 💻 作業系統需求
+- OS：Windows 10 以上
+- 平台：x86（32 位元）和 x64（64 位元）
+
+
+# 📝 使用說明
+1. 啟動 OpenSpeedy
+2. 執行需要變速的目標遊戲
 <img src="https://github.com/user-attachments/assets/648e721d-9c3a-4d82-954c-19b16355d084" width="50%">
 
-3. Select the game process and adjust the speed multiplier in the OpenSpeedy interface
+3. 勾選遊戲處理程序，在 OpenSpeedy 介面中調整速度倍率
 <img src="https://github.com/user-attachments/assets/9cd56353-1906-44c5-ba29-b5b4d2db2b80" width="50%"/>
 
-4. Takes effect immediately — see the comparison below
+4. 即刻生效，對比效果如下
 
 <video src="https://github.com/user-attachments/assets/7c75e37d-bc7a-4639-89a0-a34a21676cba" width="70%"></video>
 
-# 🔧 How It Works
+# 🔧 技術原理
 
-Prerequisites:
+編譯環境需求：
 - [Node.js](https://nodejs.org/) 18+
 - [Rust](https://www.rust-lang.org/)
 - [CMake](https://cmake.org/)
-- [Visual Studio](https://visualstudio.microsoft.com/) (with C++ desktop development workload)
+- [Visual Studio](https://visualstudio.microsoft.com/)（含 C++ 桌面開發工作負載）
 
-Build command:
+編譯指令：
 
 ``` powershell
 npm run tauri dev
 ```
 
-OpenSpeedy adjusts game speed by hooking the following Windows system time functions:
+OpenSpeedy 透過 Hook 以下 Windows 系統時間函式來實現遊戲速度調整：
 
-| Function | Library | Purpose |
-|----------|---------|---------|
-| Sleep | user32.dll | Thread sleep |
-| SetTimer | user32.dll | Creates message-based timers |
-| timeGetTime | winmm.dll | Retrieves system uptime in milliseconds |
-| GetTickCount | kernel32.dll | Retrieves system uptime in milliseconds |
-| GetTickCount64 | kernel32.dll | Retrieves system uptime in milliseconds (64-bit) |
-| QueryPerformanceCounter | kernel32.dll | High-resolution performance counter |
-| GetSystemTimeAsFileTime | kernel32.dll | Retrieves system time |
-| GetSystemTimePreciseAsFileTime | kernel32.dll | Retrieves high-precision system time |
-| SetWaitableTimer | kernel32.dll | Sets a waitable timer |
-| SetWaitableTimerEx | kernel32.dll | Sets a waitable timer (extended) |
+| 函式名稱 | 所屬程式庫 | 功能 |
+|--------|----------|------------------|
+| Sleep | user32.dll | 執行緒休眠 |
+| SetTimer | user32.dll | 建立基於訊息的計時器 |
+| timeGetTime | winmm.dll | 取得系統啟動後經過的毫秒數 |
+| GetTickCount | kernel32.dll | 取得系統啟動後經過的毫秒數 |
+| GetTickCount64 | kernel32.dll | 取得系統啟動後經過的毫秒數（64 位元） |
+| QueryPerformanceCounter | kernel32.dll | 高精度效能計數器 |
+| GetSystemTimeAsFileTime | kernel32.dll | 取得系統時間 |
+| GetSystemTimePreciseAsFileTime | kernel32.dll | 取得高精度系統時間 |
+| SetWaitableTimer | kernel32.dll | 設定可等待計時器 |
+| SetWaitableTimerEx | kernel32.dll | 設定可等待計時器（擴充） |
 
-# ⚠️ Warnings
-- This tool is for educational and research purposes only
-- Some online games have anti-cheat systems — using this tool may result in account bans
-- Excessive speed may cause game physics engine glitches or crashes
-- Not recommended for use in competitive online games
-- Open-source software without digital signatures may trigger false positives from antivirus software
+# ⚠️ 注意事項
+- 本工具僅供學習和研究使用
+- 部分線上遊戲可能有反作弊系統，使用本工具可能導致帳號被停權
+- 過度加速可能導致遊戲物理引擎異常或崩潰
+- 不建議在競技類線上遊戲中使用
+- 開源產品不帶數位簽章，可能被防毒軟體誤報
 
-# 🔄 Feedback
-If you encounter any issues, please reach out via:
-- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — Check the wiki first for common issues
-- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Submit bug reports. Please do not submit cloud storage related issues, thank you for your cooperation~ 🙏
+# 🔄 意見回饋
+如果在使用過程中遇到任何問題，歡迎透過以下方式回饋：
+- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — 先檢視 Wiki 了解常見問題
+- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — 提交問題回報，雲端硬碟類問題請勿提 issue，感謝合作～🙏
 
 
-# 📜 License
-OpenSpeedy is licensed under the GPL v3 license.
+# 📜 開源授權
+OpenSpeedy 遵循 GPL v3 授權條款。
 
-# 🙏 Acknowledgments
-OpenSpeedy uses source code from the following projects. Thanks to the open-source community! If OpenSpeedy helps you, a Star is welcome!
-- [minhook](https://github.com/TsudaKageyu/minhook): For API hooking
-- [tauri](https://tauri.app/): GUI framework
-- [MUI](https://mui.com/): UI component library
-- [Ant Design](https://ant.design/): UI splitter component
+# 🙏 致謝
+OpenSpeedy 使用到以下專案的原始碼，感謝開源社群的力量，如果 OpenSpeedy 對你有幫助，歡迎 Star！
+- [minhook](https://github.com/TsudaKageyu/minhook)：用於 API Hook
+- [tauri](https://tauri.app/)：GUI
+- [MUI](https://mui.com/)：UI 元件庫
+- [Ant Design](https://ant.design/)：UI 分割面板元件
 
-Disclaimer: OpenSpeedy is intended for educational and research purposes only. Users assume all risks and liabilities associated with the use of this software. The author is not responsible for any loss or legal liability arising from the use of this software.
+免責聲明：OpenSpeedy 僅用於教育和研究目的。使用者應自行承擔使用本軟體的所有風險和責任。作者不對因使用本軟體導致的任何損失或法律責任負責。
 
 <a href="https://openomy.com/game1024/openspeedy" target="_blank" style="display: block; width: 100%;" align="center">
   <img src="https://openomy.com/svg?repo=game1024/openspeedy&chart=bubble&latestMonth=6" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />

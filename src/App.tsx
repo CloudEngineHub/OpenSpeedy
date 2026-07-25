@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { getVersion } from "@tauri-apps/api/app";
-import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch, Chip } from "@mui/material";
+import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch, Chip, IconButton } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SpeedIcon from "@mui/icons-material/Speed";
@@ -11,6 +11,8 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import TitleBar from "./components/TitleBar";
 import appIcon from "../src-tauri/icons/icon.png";
+import githubIcon from "./assets/github.svg";
+import bmcIcon from "./assets/bmc.svg";
 import ProcessManager from "./components/ProcessManager";
 import SettingsManager from "./components/SettingsManager";
 import { useShortcut } from "./hooks/useShortcut";
@@ -160,16 +162,32 @@ function App() {
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>{t("about.system")}</Typography>
                       <Typography variant="caption" color="text.secondary">{osVer}</Typography>
                     </Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>GitHub</Typography>
-                      <Typography variant="body2"
-                        onClick={() => open("https://github.com/game1024/OpenSpeedy")}
-                        sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>
-                        github.com/game1024/OpenSpeedy
-                      </Typography>
-                    </Box>
+
 
                   </Paper>
+
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mt: 3 }}>
+                    <IconButton
+                      onClick={() => open("https://github.com/game1024")}
+                      sx={{
+                        width: 44, height: 44,
+                        border: 1, borderColor: "divider",
+                        "&:hover": { bgcolor: "action.hover", borderColor: "primary.main" },
+                      }}
+                    >
+                      <Box component="img" src={githubIcon} sx={{ width: 22, height: 22, filter: darkMode ? "invert(1)" : "none" }} />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => open("https://buymeacoffee.com/game1024")}
+                      sx={{
+                        width: 44, height: 44,
+                        border: 1, borderColor: "divider",
+                        "&:hover": { bgcolor: "action.hover", borderColor: "primary.main" },
+                      }}
+                    >
+                      <Box component="img" src={bmcIcon} sx={{ width: 22, height: 22 }} />
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             )}

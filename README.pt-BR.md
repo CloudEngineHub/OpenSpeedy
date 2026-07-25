@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://ref.365tz87989.com/?r=RWQVZD">
-    <img src="https://github.com/user-attachments/assets/bde1585b-d0ca-4892-b84a-9c0276804422" />
+    <img src="https://github.com/user-attachments/assets/e50ac3de-a1a8-4185-b081-c9f22ea126fe" />
   </a>
 </p>
 
@@ -63,7 +63,18 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ko-KR.md">한국어</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.pt-BR.md">Português (BR)</a> | <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">中文</a>
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ko-KR.md">한국어</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.pt-BR.md">Português (BR)</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ru-RU.md">Русский</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.es-ES.md">Español</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.nl-NL.md">Nederlands</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.hi-IN.md">हिन्दी</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.zh-TW.md">繁體中文</a> |
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">简体中文</a>
 
 # 🚀 Funcionalidades
 

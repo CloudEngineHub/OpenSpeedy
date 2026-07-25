@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  The Best Open-Source Game Speed Controller
+  El mejor controlador de velocidad de código abierto para juegos
 </p>
 
 <p align="center">
@@ -45,7 +45,7 @@
   <br/>
   
   <a href="https://github.com/game1024/OpenSpeedy/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="Commit Activity">
+    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="Actividad de commits">
   </a>
   <img src="https://img.shields.io/badge/language-C/C++-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/License-GPLv3-green.svg?style=for-the-badge">
@@ -87,99 +87,99 @@
 </p>
 
 
-# 🚀 Features
-- Quick speed adjustment
-- Modern UI
-- Supports both x86 and x64 platform processes
-- No kernel intrusion — Ring-3 level hooking, does not tamper with the system kernel
+# 🚀 Características
+- Ajuste rápido de velocidad
+- Interfaz moderna
+- Compatible con procesos x86 y x64
+- Sin intrusión en el núcleo — hooking a nivel Ring3, no altera el núcleo del sistema
 
 
-# 💾 Installation
-📦 **Method 1: Winget**
+# 💾 Instalación
+📦 **Método 1: Winget**
 
 ``` powershell
-# Install command
+# Comando de instalación
 winget install openspeedy
 
-# Open a new terminal and run openspeedy
+# Abre una nueva terminal y ejecuta openspeedy
 openspeedy
 ```
 
-📥 **Method 2: Manual Download**
+📥 **Método 2: Descarga manual**
 
-Visit the [Releases page](https://github.com/game1024/OpenSpeedy/releases) to download the latest version.
-
-
-# 💻 System Requirements
-- OS: Windows 10 or later
-- Platform: x86 (32-bit) and x64 (64-bit)
+Visita la [página de versiones](https://github.com/game1024/OpenSpeedy/releases) para descargar la última versión.
 
 
-# 📝 Usage
-1. Launch OpenSpeedy
-2. Run the target game you want to speed up
+# 💻 Requisitos del sistema
+- SO: Windows 10 o posterior
+- Plataforma: x86 (32 bits) y x64 (64 bits)
+
+
+# 📝 Uso
+1. Inicia OpenSpeedy
+2. Ejecuta el juego que quieras acelerar o ralentizar
 <img src="https://github.com/user-attachments/assets/648e721d-9c3a-4d82-954c-19b16355d084" width="50%">
 
-3. Select the game process and adjust the speed multiplier in the OpenSpeedy interface
+3. Selecciona el proceso del juego y ajusta el multiplicador de velocidad en OpenSpeedy
 <img src="https://github.com/user-attachments/assets/9cd56353-1906-44c5-ba29-b5b4d2db2b80" width="50%"/>
 
-4. Takes effect immediately — see the comparison below
+4. Efecto inmediato — mira la comparación a continuación
 
 <video src="https://github.com/user-attachments/assets/7c75e37d-bc7a-4639-89a0-a34a21676cba" width="70%"></video>
 
-# 🔧 How It Works
+# 🔧 Cómo funciona
 
-Prerequisites:
+Requisitos de compilación:
 - [Node.js](https://nodejs.org/) 18+
 - [Rust](https://www.rust-lang.org/)
 - [CMake](https://cmake.org/)
-- [Visual Studio](https://visualstudio.microsoft.com/) (with C++ desktop development workload)
+- [Visual Studio](https://visualstudio.microsoft.com/) (con carga de trabajo de desarrollo de escritorio C++)
 
-Build command:
+Comando de compilación:
 
 ``` powershell
 npm run tauri dev
 ```
 
-OpenSpeedy adjusts game speed by hooking the following Windows system time functions:
+OpenSpeedy ajusta la velocidad del juego interceptando las siguientes funciones de tiempo del sistema Windows:
 
-| Function | Library | Purpose |
+| Función | Biblioteca | Propósito |
 |----------|---------|---------|
-| Sleep | user32.dll | Thread sleep |
-| SetTimer | user32.dll | Creates message-based timers |
-| timeGetTime | winmm.dll | Retrieves system uptime in milliseconds |
-| GetTickCount | kernel32.dll | Retrieves system uptime in milliseconds |
-| GetTickCount64 | kernel32.dll | Retrieves system uptime in milliseconds (64-bit) |
-| QueryPerformanceCounter | kernel32.dll | High-resolution performance counter |
-| GetSystemTimeAsFileTime | kernel32.dll | Retrieves system time |
-| GetSystemTimePreciseAsFileTime | kernel32.dll | Retrieves high-precision system time |
-| SetWaitableTimer | kernel32.dll | Sets a waitable timer |
-| SetWaitableTimerEx | kernel32.dll | Sets a waitable timer (extended) |
+| Sleep | user32.dll | Suspensión de hilo |
+| SetTimer | user32.dll | Crea temporizadores basados en mensajes |
+| timeGetTime | winmm.dll | Obtiene el tiempo de actividad del sistema en milisegundos |
+| GetTickCount | kernel32.dll | Obtiene el tiempo de actividad del sistema en milisegundos |
+| GetTickCount64 | kernel32.dll | Obtiene el tiempo de actividad del sistema en milisegundos (64 bits) |
+| QueryPerformanceCounter | kernel32.dll | Contador de rendimiento de alta resolución |
+| GetSystemTimeAsFileTime | kernel32.dll | Obtiene la hora del sistema |
+| GetSystemTimePreciseAsFileTime | kernel32.dll | Obtiene la hora del sistema de alta precisión |
+| SetWaitableTimer | kernel32.dll | Establece un temporizador esperable |
+| SetWaitableTimerEx | kernel32.dll | Establece un temporizador esperable (extendido) |
 
-# ⚠️ Warnings
-- This tool is for educational and research purposes only
-- Some online games have anti-cheat systems — using this tool may result in account bans
-- Excessive speed may cause game physics engine glitches or crashes
-- Not recommended for use in competitive online games
-- Open-source software without digital signatures may trigger false positives from antivirus software
+# ⚠️ Advertencias
+- Esta herramienta es solo para fines educativos y de investigación
+- Algunos juegos en línea tienen sistemas antitrampas — el uso de esta herramienta puede resultar en la suspensión de la cuenta
+- Una velocidad excesiva puede causar fallos en el motor de física o cierres inesperados
+- No se recomienda su uso en juegos competitivos en línea
+- El software de código abierto sin firmas digitales puede generar falsos positivos en el software antivirus
 
-# 🔄 Feedback
-If you encounter any issues, please reach out via:
-- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — Check the wiki first for common issues
-- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Submit bug reports. Please do not submit cloud storage related issues, thank you for your cooperation~ 🙏
+# 🔄 Comentarios
+Si encuentras algún problema, por favor contacta a través de:
+- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — Consulta primero la wiki para problemas comunes
+- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Envía informes de errores. Por favor, no envíes problemas relacionados con almacenamiento en la nube, gracias por tu cooperación~ 🙏
 
 
-# 📜 License
-OpenSpeedy is licensed under the GPL v3 license.
+# 📜 Licencia
+OpenSpeedy está licenciado bajo la licencia GPL v3.
 
-# 🙏 Acknowledgments
-OpenSpeedy uses source code from the following projects. Thanks to the open-source community! If OpenSpeedy helps you, a Star is welcome!
-- [minhook](https://github.com/TsudaKageyu/minhook): For API hooking
-- [tauri](https://tauri.app/): GUI framework
-- [MUI](https://mui.com/): UI component library
-- [Ant Design](https://ant.design/): UI splitter component
+# 🙏 Agradecimientos
+OpenSpeedy utiliza código fuente de los siguientes proyectos. ¡Gracias a la comunidad de código abierto! Si OpenSpeedy te ayuda, ¡una estrella es bienvenida!
+- [minhook](https://github.com/TsudaKageyu/minhook): Para hooking de API
+- [tauri](https://tauri.app/): Framework de GUI
+- [MUI](https://mui.com/): Biblioteca de componentes de UI
+- [Ant Design](https://ant.design/): Componente divisor de UI
 
-Disclaimer: OpenSpeedy is intended for educational and research purposes only. Users assume all risks and liabilities associated with the use of this software. The author is not responsible for any loss or legal liability arising from the use of this software.
+Descargo de responsabilidad: OpenSpeedy está destinado únicamente a fines educativos y de investigación. Los usuarios asumen todos los riesgos y responsabilidades asociados con el uso de este software. El autor no se hace responsable de ninguna pérdida o responsabilidad legal derivada del uso de este software.
 
 <a href="https://openomy.com/game1024/openspeedy" target="_blank" style="display: block; width: 100%;" align="center">
   <img src="https://openomy.com/svg?repo=game1024/openspeedy&chart=bubble&latestMonth=6" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
