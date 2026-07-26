@@ -74,7 +74,7 @@
   },
   "settings": {
     "loading": "Einstellungen laden…",
-    "speedShortcuts": "Tastenkürzel",
+    "speedShortcuts": "Geschwindigkeit +/-",
     "shortcut": "Kürzel",
     "step": "Schritt",
     "increase": "Erhöhen",
@@ -82,7 +82,7 @@
     "reset": "Zurücksetzen",
     "confirm": "OK",
     "cancel": "Abbrechen",
-    "gears": "Gang-Voreinstellungen",
+    "gears": "Gangstufen",
     "hold": "Halten",
     "gear": "Gang",
     "multiplier": "Multiplikator",

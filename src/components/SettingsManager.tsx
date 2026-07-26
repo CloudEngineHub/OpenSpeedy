@@ -23,7 +23,7 @@ import type { SettingsState } from "../store/settings";
 
 function Row({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", py: 0.8, px: 1, "&:not(:last-child)": { borderBottom: 1, borderColor: "divider" } }}>
+    <Box sx={{ display: "flex", alignItems: "center", py: 0.8, px: 1 }}>
       <Typography component="span" variant="body2" sx={{ flex: 1, color: "text.primary" }}>{label}</Typography>
       {children}
     </Box>
@@ -78,6 +78,14 @@ export default function SettingsManager() {
       <Paper elevation={0} sx={{ mt: 2, p: 2, bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
 
         {/* ── 速度快捷键 ── */}
+        <Divider sx={{ my: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <SpeedIcon sx={{ color: "secondary.main", fontSize: 18 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
+              {t("settings.speedShortcuts")}
+            </Typography>
+          </Box>
+        </Divider>
         <Table size="small">
           <colgroup>
             <col />
@@ -86,27 +94,20 @@ export default function SettingsManager() {
           </colgroup>
           <TableHead>
             <TableRow>
-              <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <SpeedIcon sx={{ color: "secondary.main", fontSize: 18 }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
-                    {t("settings.speedShortcuts")}
-                  </Typography>
-                </Box>
-              </TableCell>
-              <TableCell>{t("settings.shortcut")}</TableCell>
-              <TableCell>{t("settings.step")}</TableCell>
+              <TableCell sx={{ border: "none", textAlign: "center" }}></TableCell>
+              <TableCell sx={{ border: "none", textAlign: "center" }}>{t("settings.shortcut")}</TableCell>
+              <TableCell sx={{ border: "none", textAlign: "center" }}>{t("settings.step")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell sx={{ borderBottom: "none" }}>{t("settings.increase")}</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>{t("settings.increase")}</TableCell>
+              <TableCell sx={{ border: "none" }}>
                 <ShortcutField value={settings.increaseSpeedShortcut} conflict={shortcutStatus[settings.increaseSpeedShortcut] === false} onChange={v => changeShortcut("increaseSpeedShortcut", settings.increaseSpeedShortcut, v, () => {
                   invoke<number | null>("bridge_get_speed").then(c => { const n = (c ?? 1) + ((get("increaseSpeedStep") as number) || 0.5); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>
                 <TextField type="number" size="small"
                   value={settings.increaseSpeedStep}
                   onChange={e => set("increaseSpeedStep", Number(e.target.value) || 0.1)}
@@ -114,13 +115,13 @@ export default function SettingsManager() {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell sx={{ borderBottom: "none" }}>{t("settings.decrease")}</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>{t("settings.decrease")}</TableCell>
+              <TableCell sx={{ border: "none" }}>
                 <ShortcutField value={settings.decreaseSpeedShortcut} conflict={shortcutStatus[settings.decreaseSpeedShortcut] === false} onChange={v => changeShortcut("decreaseSpeedShortcut", settings.decreaseSpeedShortcut, v, () => {
                   invoke<number | null>("bridge_get_speed").then(c => { const n = Math.max(0.01, (c ?? 1) - ((get("decreaseSpeedStep") as number) || 0.5)); invoke("bridge_set_speed", { factor: n }); set("speed", n); });
                 })} />
               </TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>
                 <TextField type="number" size="small"
                   value={settings.decreaseSpeedStep}
                   onChange={e => set("decreaseSpeedStep", Number(e.target.value) || 0.1)}
@@ -129,44 +130,49 @@ export default function SettingsManager() {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell sx={{ borderBottom: "none" }}>{t("settings.reset")}</TableCell>
-              <TableCell sx={{ borderBottom: "none" }} colSpan={1}>
+              <TableCell sx={{ border: "none" }}>{t("settings.reset")}</TableCell>
+              <TableCell sx={{ border: "none" }} colSpan={1}>
                 <ShortcutField value={settings.resetSpeedShortcut} conflict={shortcutStatus[settings.resetSpeedShortcut] === false} onChange={v => changeShortcut("resetSpeedShortcut", settings.resetSpeedShortcut, v, () => {
                   invoke("bridge_set_speed", { factor: 1.0 }); set("speed", 1.0);
                 })} />
               </TableCell>
-              <TableCell sx={{ borderBottom: "none" }}></TableCell>
+              <TableCell sx={{ border: "none" }}></TableCell>
             </TableRow>
           </TableBody>
         </Table>
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ my: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <TuneIcon sx={{ color: "primary.main", fontSize: 18 }} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
+                {t("settings.gears")}
+              </Typography>
+            </Box>
+          </Divider>
 
-        {/* ── 档位设置 ── */}
-        <Table size="small">
-          <colgroup>
-            <col />
-            <col width={240} />
-            <col width={80} />
-          </colgroup>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <TuneIcon sx={{ color: "primary.main", fontSize: 18 }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
-                    {t("settings.gears")}
-                  </Typography>
-                </Box> </TableCell>
-              <TableCell>{t("settings.shortcut")}</TableCell>
-              <TableCell>{t("settings.multiplier")}</TableCell>
-            </TableRow>
-          </TableHead>
+          {/* ── 档位设置 ── */}
+          <Table size="small">
+            <colgroup>
+              <col />
+              <col width={240} />
+              <col width={80} />
+            </colgroup>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ border: "none" }}></TableCell>
+                <TableCell sx={{ border: "none" }} align="center">
+                  {t("settings.shortcut")}
+                </TableCell>
+                <TableCell sx={{ border: "none" }} align="center">
+                  {t("settings.multiplier")}
+                </TableCell>
+              </TableRow>
+            </TableHead>
           <TableBody>
             {[1, 2, 3, 4, 5].map(gear => (
               <TableRow key={gear}>
-                <TableCell sx={{ borderBottom: "none" }}>{t("settings.gear")} {gear}</TableCell>
-                <TableCell sx={{ borderBottom: "none" }}>
+                <TableCell sx={{ border: "none" }}>{t("settings.gear")} {gear}</TableCell>
+                <TableCell sx={{ border: "none" }}>
                   <ShortcutField
                     value={settings?.[`gear${gear}Shortcut` as keyof SettingsState] as string}
                     conflict={shortcutStatus[settings?.[`gear${gear}Shortcut` as keyof SettingsState] as string] === false}
@@ -176,7 +182,7 @@ export default function SettingsManager() {
                     })}
                   />
                 </TableCell>
-                <TableCell sx={{ borderBottom: "none" }}>
+                <TableCell sx={{ border: "none" }}>
                   <TextField type="number" size="small"
                     value={settings?.[`gear${gear}Speed` as keyof SettingsState]}
                     onChange={e => set(`gear${gear}Speed` as keyof SettingsState, Number(e.target.value) || 1)}
@@ -187,8 +193,8 @@ export default function SettingsManager() {
             ))}
             {/* Hold shortcut — press to activate, release to reset */}
             <TableRow>
-              <TableCell sx={{ borderBottom: "none" }}>{t("settings.hold")}</TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>{t("settings.hold")}</TableCell>
+              <TableCell sx={{ border: "none" }}>
                 <ShortcutField
                   value={settings?.holdShortcut as string}
                   conflict={shortcutStatus[settings?.holdShortcut as string] === false}
@@ -205,7 +211,7 @@ export default function SettingsManager() {
                   }}
                 />
               </TableCell>
-              <TableCell sx={{ borderBottom: "none" }}>
+              <TableCell sx={{ border: "none" }}>
                 <TextField type="number" size="small"
                   value={settings?.holdSpeed as number}
                   onChange={e => set("holdSpeed", Number(e.target.value) || 2)}
@@ -216,16 +222,17 @@ export default function SettingsManager() {
           </TableBody>
         </Table>
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ my: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <SettingsIcon sx={{ color: "text.secondary", fontSize: 18 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
+              {t("settings.general")}
+            </Typography>
+          </Box>
+        </Divider>
 
         {/* ── 通用设置 ── */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, mt: 2 }}>
-          <SettingsIcon sx={{ color: "text.secondary", fontSize: 18 }} />
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "text.secondary" }}>
-            {t("settings.general")}
-          </Typography>
-        </Box>
-        <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><PowerSettingsNewIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.autoStart")}</Box>}>
+        <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5}}><PowerSettingsNewIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.autoStart")}</Box>}>
           <Switch checked={settings.autoStart} onChange={async (_, v) => {
             if (v) await enable(); else await disable();
             set("autoStart", v);

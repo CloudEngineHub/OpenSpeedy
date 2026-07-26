@@ -74,7 +74,7 @@
   },
   "settings": {
     "loading": "Chargement des paramètres…",
-    "speedShortcuts": "Raccourcis de Vitesse",
+    "speedShortcuts": "Augmenter/Diminuer",
     "shortcut": "Raccourci",
     "step": "Pas",
     "increase": "Augmenter",
@@ -82,7 +82,7 @@
     "reset": "Réinitialiser",
     "confirm": "OK",
     "cancel": "Annuler",
-    "gears": "Préréglages de Vitesse",
+    "gears": "Vitesses",
     "hold": "Maintenir",
     "gear": "Rapport",
     "multiplier": "Multiplicateur",

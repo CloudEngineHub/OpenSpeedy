@@ -71,7 +71,7 @@
   },
   "settings": {
     "loading": "載入設定中...",
-    "speedShortcuts": "變速快速鍵",
+    "speedShortcuts": "速度升降",
     "shortcut": "快速鍵",
     "step": "調整幅度",
     "increase": "微調加速",
@@ -79,7 +79,7 @@
     "reset": "恢復正常速度",
     "confirm": "確認",
     "cancel": "取消",
-    "gears": "檔位設定",
+    "gears": "變速檔位",
     "hold": "按住變速",
     "gear": "檔位",
     "multiplier": "變速倍率",

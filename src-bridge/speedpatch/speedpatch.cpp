@@ -1,4 +1,4 @@
-﻿/*
+/*
  * OpenSpeedy - Open Source Game Speed Controller
  * Copyright (C) 2025 Game1024
  *
@@ -25,7 +25,6 @@
 #include <atomic>
 #include <mmsystem.h>
 #include <shared_mutex>
-#include <sstream>
 #pragma comment(lib, "winmm.lib")
 #pragma data_seg("shared")
 static std::atomic<double> factor = 1.0;
@@ -37,80 +36,7 @@ static std::atomic<double> pre_factor = 1.0;
 static HANDLE hFileMap;
 static bool*  pEnabled;
 
-typedef VOID (WINAPI* SLEEP) (DWORD);
-typedef DWORD (WINAPI* SLEEPEX) (DWORD, BOOL);
-
-typedef UINT_PTR (WINAPI* SETTIMER) (
-    HWND,
-    UINT_PTR,
-    UINT,
-    TIMERPROC
-    );
-typedef DWORD (WINAPI* TIMEGETTIME) (VOID);
-typedef MMRESULT (WINAPI* TIMESETEVENT) (
-    UINT,
-    UINT,
-    LPTIMECALLBACK,
-    DWORD_PTR,
-    UINT
-    );
-
-typedef LONG (WINAPI* GETMESSAGETIME) (VOID);
-typedef DWORD (WINAPI* GETTICKCOUNT) (VOID);
-typedef ULONGLONG (WINAPI* GETTICKCOUNT64) (VOID);
-
-typedef BOOL (WINAPI* QUERYPERFORMANCECOUNTER) (LARGE_INTEGER*);
-typedef BOOL (WINAPI* QUERYPERFORMANCEFREQUENCY) (LARGE_INTEGER*);
-
-typedef VOID (WINAPI* GETSYSTEMTIMEASFILETIME) (LPFILETIME);
-typedef VOID (WINAPI* GETSYSTEMTIMEPRECISEASFILETIME) (LPFILETIME);
-
-typedef BOOL (WINAPI* SETWAITABLETIMER) (
-    HANDLE,
-    const LARGE_INTEGER*,
-    LONG,
-    PTIMERAPCROUTINE,
-    LPVOID,
-    BOOL);
-
-typedef BOOL (WINAPI* SETWAITABLETIMEREX) (
-    HANDLE,
-    const LARGE_INTEGER*,
-    LONG,
-    PTIMERAPCROUTINE,
-    LPVOID,
-    PREASON_CONTEXT,
-    ULONG);
-
 inline VOID shouldUpdateAll();
-
-static SLEEP realSleep = NULL;
-
-static SLEEPEX realSleepEx = NULL;
-
-static SETTIMER realSetTimer = NULL;
-
-static TIMEGETTIME realTimeGetTime = NULL;
-
-static TIMESETEVENT realTimeSetEvent = NULL;
-
-static GETMESSAGETIME realGetMessageTime = NULL;
-
-static GETTICKCOUNT realGetTickCount = NULL;
-
-static GETTICKCOUNT64 realGetTickCount64 = NULL;
-
-static QUERYPERFORMANCECOUNTER realQueryPerformanceCounter = NULL;
-
-static QUERYPERFORMANCEFREQUENCY realQueryPerformanceFrequency = NULL;
-
-static GETSYSTEMTIMEASFILETIME realGetSystemTimeAsFileTime = NULL;
-
-static GETSYSTEMTIMEPRECISEASFILETIME realGetSystemTimePreciseAsFileTime = NULL;
-
-static SETWAITABLETIMER realSetWaitableTimer = NULL;
-
-static SETWAITABLETIMEREX realSetWaitableTimerEx = NULL;
 
 SPEEDPATCH_API void SP_SetSpeed(double factor_)
 {
@@ -125,26 +51,14 @@ SPEEDPATCH_API double SP_GetSpeed()
 void SP_Install()
 {
     DWORD processId = GetCurrentProcessId();
-    std::wstring filemapName = GetProcessFileMapName(processId);
-    hFileMap = CreateFileMapping(
-        INVALID_HANDLE_VALUE,
-        NULL,
-        PAGE_READWRITE,
-        0,
-        sizeof (bool),
-        filemapName.c_str()
-        );
+    WCHAR filemapName[64];
+    GetProcessFileMapName(processId, filemapName, 64);
+    hFileMap = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof (bool), filemapName);
     if (hFileMap == NULL)
     {
         return;
     }
-    pEnabled = (bool*) MapViewOfFile(
-        hFileMap,
-        FILE_MAP_ALL_ACCESS,
-        0,
-        0,
-        sizeof (bool)
-        );
+    pEnabled = (bool*) MapViewOfFile(hFileMap, FILE_MAP_ALL_ACCESS, 0, 0, sizeof (bool));
     if (pEnabled == NULL)
     {
         CloseHandle(hFileMap);
@@ -170,20 +84,14 @@ BOOL SP_IsEnabled()
 
 SPEEDPATCH_API BOOL SP_IsEnabledById(DWORD processId)
 {
-    std::wstring filemapName = GetProcessFileMapName(processId);
-    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_READ,
-                                     FALSE,
-                                     filemapName.c_str()
-                                     );
+    WCHAR filemapName[64];
+    GetProcessFileMapName(processId, filemapName, 64);
+    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_READ, FALSE, filemapName);
     if (hFileMap_ == NULL)
     {
         return FALSE;
     }
-    bool* pStatus = (bool*) MapViewOfFile(hFileMap_,
-                                          FILE_MAP_READ,
-                                          0,
-                                          0,
-                                          sizeof (bool));
+    bool* pStatus = (bool*) MapViewOfFile(hFileMap_, FILE_MAP_READ, 0, 0, sizeof (bool));
     if (pStatus == NULL)
     {
         CloseHandle(hFileMap_);
@@ -197,20 +105,14 @@ SPEEDPATCH_API BOOL SP_IsEnabledById(DWORD processId)
 
 void SP_Enable(DWORD processId)
 {
-    std::wstring filemapName = GetProcessFileMapName(processId);
-    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_ALL_ACCESS,
-                                     FALSE,
-                                     filemapName.c_str()
-                                     );
+    WCHAR filemapName[64];
+    GetProcessFileMapName(processId, filemapName, 64);
+    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, filemapName);
     if (hFileMap_ == NULL)
     {
         return;
     }
-    bool* pStatus = (bool*) MapViewOfFile(hFileMap_,
-                                          FILE_MAP_ALL_ACCESS,
-                                          0,
-                                          0,
-                                          sizeof (bool));
+    bool* pStatus = (bool*) MapViewOfFile(hFileMap_, FILE_MAP_ALL_ACCESS, 0, 0, sizeof (bool));
     if (pStatus == NULL)
     {
         CloseHandle(hFileMap_);
@@ -223,20 +125,14 @@ void SP_Enable(DWORD processId)
 
 void SP_Disable(DWORD processId)
 {
-    std::wstring filemapName = GetProcessFileMapName(processId);
-    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_ALL_ACCESS,
-                                     FALSE,
-                                     filemapName.c_str()
-                                     );
+    WCHAR filemapName[64];
+    GetProcessFileMapName(processId, filemapName, 64);
+    HANDLE hFileMap_ = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, filemapName);
     if (hFileMap_ == NULL)
     {
         return;
     }
-    bool* pStatus = (bool*) MapViewOfFile(hFileMap_,
-                                          FILE_MAP_ALL_ACCESS,
-                                          0,
-                                          0,
-                                          sizeof (bool));
+    bool* pStatus = (bool*) MapViewOfFile(hFileMap_, FILE_MAP_ALL_ACCESS, 0, 0, sizeof (bool));
     if (pStatus == NULL)
     {
         CloseHandle(hFileMap_);
@@ -247,24 +143,9 @@ void SP_Disable(DWORD processId)
     CloseHandle(hFileMap_);
 }
 
-std::wstring GetCurrentProcessName()
+VOID GetProcessFileMapName(DWORD processId, WCHAR* buf, DWORD bufSize)
 {
-    wchar_t processPath[MAX_PATH];
-    GetModuleFileName(NULL, processPath, MAX_PATH);
-    std::wstring fullPath(processPath);
-    size_t lastSlash = fullPath.find_last_of(L"\\");
-    if (lastSlash != std::wstring::npos)
-    {
-        fullPath = fullPath.substr(lastSlash + 1);
-    }
-    return fullPath;
-}
-
-std::wstring GetProcessFileMapName(DWORD processId)
-{
-    std::wstringstream wss;
-    wss << L"OpenSpeedy." << processId;
-    return wss.str();
+    wsprintfW(buf, L"OpenSpeedy.%lu", processId);
 }
 
 double SpeedFactor()
@@ -279,38 +160,46 @@ double SpeedFactor()
     }
 }
 
-VOID WINAPI DetourSleep(DWORD dwMilliseconds)
+typedef VOID (WINAPI* SLEEP) (DWORD);
+
+static SLEEP Real_Sleep = NULL;
+
+VOID WINAPI Hook_Sleep(DWORD dwMilliseconds)
 {
-    realSleep(dwMilliseconds / SpeedFactor());
+    Real_Sleep(dwMilliseconds / SpeedFactor());
 }
 
-DWORD WINAPI DetourSleepEx(DWORD dwMilliseconds, BOOL bAlertable)
+typedef DWORD (WINAPI* SLEEPEX) (DWORD, BOOL);
+
+static SLEEPEX Real_SleepEx = NULL;
+
+DWORD WINAPI Hook_SleepEx(DWORD dwMilliseconds, BOOL bAlertable)
 {
 
-    return realSleepEx(dwMilliseconds / SpeedFactor(), bAlertable);
+    return Real_SleepEx(dwMilliseconds / SpeedFactor(), bAlertable);
 }
 
-UINT_PTR WINAPI DetourSetTimer(HWND      hWnd,
-                               UINT_PTR  nIDEvent,
-                               UINT      uElapse,
-                               TIMERPROC lpTimerFunc)
+typedef UINT_PTR (WINAPI* SETTIMER) (HWND, UINT_PTR, UINT, TIMERPROC);
+
+static SETTIMER Real_SetTimer = NULL;
+
+UINT_PTR WINAPI Hook_SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc)
 {
 
-    return realSetTimer(
-        hWnd,
-        nIDEvent,
-        uElapse / SpeedFactor(),
-        lpTimerFunc
-        );
+    return Real_SetTimer(hWnd, nIDEvent, uElapse / SpeedFactor(), lpTimerFunc);
 }
 
-static std::atomic<DWORD> baselineKernelTimeGetTime = 0;
-static std::atomic<DWORD> baselineDetourTimeGetTime = 0;
-static std::atomic<DWORD> prevcallKernelTimeGetTime = 0;
-static std::atomic<DWORD> prevcallDetourTimeGetTime = 0;
+static std::atomic<DWORD> baseReal_TimeGetTime = 0;
+static std::atomic<DWORD> baseHook_TimeGetTime = 0;
+static std::atomic<DWORD> lastReal_TimeGetTime = 0;
+static std::atomic<DWORD> lastHook_TimeGetTime = 0;
 static std::atomic<bool> shouldUpdateTimeGetTime = false;
 
-DWORD WINAPI DetourTimeGetTime(VOID)
+typedef DWORD (WINAPI* TIMEGETTIME) (VOID);
+
+static TIMEGETTIME Real_TimeGetTime = NULL;
+
+DWORD WINAPI Hook_TimeGetTime(VOID)
 {
 
     if (pre_factor != SpeedFactor())
@@ -321,38 +210,38 @@ DWORD WINAPI DetourTimeGetTime(VOID)
     bool expected = true;
     if (shouldUpdateTimeGetTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelTimeGetTime.store(prevcallKernelTimeGetTime.load());
-        baselineDetourTimeGetTime.store(prevcallDetourTimeGetTime.load());
+        baseReal_TimeGetTime.store(lastReal_TimeGetTime.load());
+        baseHook_TimeGetTime.store(lastHook_TimeGetTime.load());
     }
-    DWORD now = realTimeGetTime();
-    prevcallKernelTimeGetTime.store(now);
-    DWORD bk = baselineKernelTimeGetTime.load();
-    DWORD delta = SpeedFactor() * (now - bk);
-    DWORD bd = baselineDetourTimeGetTime.load();
-    prevcallDetourTimeGetTime.store(bd + delta);
-    return bd + delta;
+    DWORD now = Real_TimeGetTime();
+    lastReal_TimeGetTime.store(now);
+    DWORD baseReal = baseReal_TimeGetTime.load();
+    DWORD delta = SpeedFactor() * (now - baseReal);
+    DWORD baseHook = baseHook_TimeGetTime.load();
+    lastHook_TimeGetTime.store(baseHook + delta);
+    return baseHook + delta;
 }
 
-MMRESULT WINAPI DetourTimeSetEvent(UINT           uDelay,
-                                   UINT           uResolution,
-                                   LPTIMECALLBACK lpTimeProc,
-                                   DWORD_PTR      dwUser,
-                                   UINT           fuEvent)
+typedef MMRESULT (WINAPI* TIMESETEVENT) (UINT, UINT, LPTIMECALLBACK, DWORD_PTR, UINT);
+
+static TIMESETEVENT Real_TimeSetEvent = NULL;
+
+MMRESULT WINAPI Hook_TimeSetEvent(UINT uDelay, UINT uResolution, LPTIMECALLBACK lpTimeProc, DWORD_PTR dwUser, UINT fuEvent)
 {
-    return realTimeSetEvent(
-        uDelay / SpeedFactor(),
-        uResolution,
-        lpTimeProc,
-        dwUser,
-        fuEvent);
+    return Real_TimeSetEvent(uDelay / SpeedFactor(), uResolution, lpTimeProc, dwUser, fuEvent);
 }
 
-static std::atomic<LONG> baselineKernelGetMessageTime = 0;
-static std::atomic<LONG> baselineDetourGetMessageTime = 0;
-static std::atomic<LONG> prevcallKernelGetMessageTime = 0;
-static std::atomic<LONG> prevcallDetourGetMessageTime = 0;
+static std::atomic<LONG> baseReal_GetMessageTime = 0;
+static std::atomic<LONG> baseHook_GetMessageTime = 0;
+static std::atomic<LONG> lastReal_GetMessageTime = 0;
+static std::atomic<LONG> lastHook_GetMessageTime = 0;
 static std::atomic<bool> shouldUpdateGetMessageTime = false;
-LONG WINAPI DetourGetMessageTime(VOID)
+
+typedef LONG (WINAPI* GETMESSAGETIME) (VOID);
+
+static GETMESSAGETIME Real_GetMessageTime = NULL;
+
+LONG WINAPI Hook_GetMessageTime(VOID)
 {
 
     if (pre_factor != SpeedFactor())
@@ -363,24 +252,29 @@ LONG WINAPI DetourGetMessageTime(VOID)
     bool expected = true;
     if (shouldUpdateGetMessageTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetMessageTime.store(prevcallKernelGetMessageTime.load());
-        baselineDetourGetMessageTime.store(prevcallDetourGetMessageTime.load());
+        baseReal_GetMessageTime.store(lastReal_GetMessageTime.load());
+        baseHook_GetMessageTime.store(lastHook_GetMessageTime.load());
     }
-    LONG now = realGetMessageTime();
-    prevcallKernelGetMessageTime.store(now);
-    LONG bk = baselineKernelGetMessageTime.load();
-    DWORD delta = SpeedFactor() * (now - bk);
-    LONG bd = baselineDetourGetMessageTime.load();
-    prevcallDetourGetMessageTime.store(bd + delta);
-    return bd + delta;
+    LONG now = Real_GetMessageTime();
+    lastReal_GetMessageTime.store(now);
+    LONG baseReal = baseReal_GetMessageTime.load();
+    DWORD delta = SpeedFactor() * (now - baseReal);
+    LONG baseHook = baseHook_GetMessageTime.load();
+    lastHook_GetMessageTime.store(baseHook + delta);
+    return baseHook + delta;
 }
 
-static std::atomic<DWORD> baselineKernelGetTickCount = 0;
-static std::atomic<DWORD> baselineDetourGetTickCount = 0;
-static std::atomic<DWORD> prevcallKernelGetTickCount = 0;
-static std::atomic<DWORD> prevcallDetourGetTickCount = 0;
+static std::atomic<DWORD> baseReal_GetTickCount = 0;
+static std::atomic<DWORD> baseHook_GetTickCount = 0;
+static std::atomic<DWORD> lastReal_GetTickCount = 0;
+static std::atomic<DWORD> lastHook_GetTickCount = 0;
 static std::atomic<bool> shouldUpdateGetTickCount = false;
-DWORD WINAPI DetourGetTickCount(VOID)
+
+typedef DWORD (WINAPI* GETTICKCOUNT) (VOID);
+
+static GETTICKCOUNT Real_GetTickCount = NULL;
+
+DWORD WINAPI Hook_GetTickCount(VOID)
 {
 
     if (pre_factor != SpeedFactor())
@@ -391,24 +285,29 @@ DWORD WINAPI DetourGetTickCount(VOID)
     bool expected = true;
     if (shouldUpdateGetTickCount.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetTickCount.store(prevcallKernelGetTickCount.load());
-        baselineDetourGetTickCount.store(prevcallDetourGetTickCount.load());
+        baseReal_GetTickCount.store(lastReal_GetTickCount.load());
+        baseHook_GetTickCount.store(lastHook_GetTickCount.load());
     }
-    DWORD now = realGetTickCount();
-    prevcallKernelGetTickCount.store(now);
-    DWORD bk = baselineKernelGetTickCount.load();
-    DWORD delta = SpeedFactor() * (now - bk);
-    DWORD bd = baselineDetourGetTickCount.load();
-    prevcallDetourGetTickCount.store(bd + delta);
-    return bd + delta;
+    DWORD now = Real_GetTickCount();
+    lastReal_GetTickCount.store(now);
+    DWORD baseReal = baseReal_GetTickCount.load();
+    DWORD delta = SpeedFactor() * (now - baseReal);
+    DWORD baseHook = baseHook_GetTickCount.load();
+    lastHook_GetTickCount.store(baseHook + delta);
+    return baseHook + delta;
 }
 
-static std::atomic<ULONGLONG> baselineKernelGetTickCount64 = 0;
-static std::atomic<ULONGLONG> baselineDetourGetTickCount64 = 0;
-static std::atomic<ULONGLONG> prevcallKernelGetTickCount64 = 0;
-static std::atomic<ULONGLONG> prevcallDetourGetTickCount64 = 0;
+static std::atomic<ULONGLONG> baseReal_GetTickCount64 = 0;
+static std::atomic<ULONGLONG> baseHook_GetTickCount64 = 0;
+static std::atomic<ULONGLONG> lastReal_GetTickCount64 = 0;
+static std::atomic<ULONGLONG> lastHook_GetTickCount64 = 0;
 std::atomic<bool> shouldUpdateGetTickCount64 = false;
-ULONGLONG WINAPI DetourGetTickCount64(VOID)
+
+typedef ULONGLONG (WINAPI* GETTICKCOUNT64) (VOID);
+
+static GETTICKCOUNT64 Real_GetTickCount64 = NULL;
+
+ULONGLONG WINAPI Hook_GetTickCount64(VOID)
 {
 
     if (pre_factor != SpeedFactor())
@@ -419,24 +318,29 @@ ULONGLONG WINAPI DetourGetTickCount64(VOID)
     bool expected = true;
     if (shouldUpdateGetTickCount64.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetTickCount64.store(prevcallKernelGetTickCount64.load());
-        baselineDetourGetTickCount64.store(prevcallDetourGetTickCount64.load());
+        baseReal_GetTickCount64.store(lastReal_GetTickCount64.load());
+        baseHook_GetTickCount64.store(lastHook_GetTickCount64.load());
     }
-    ULONGLONG now = realGetTickCount64();
-    prevcallKernelGetTickCount64.store(now);
-    ULONGLONG bk = baselineKernelGetTickCount64.load();
-    ULONGLONG delta = SpeedFactor() * (now - bk);
-    ULONGLONG bd = baselineDetourGetTickCount64.load();
-    prevcallDetourGetTickCount64.store(bd + delta);
-    return bd + delta;
+    ULONGLONG now = Real_GetTickCount64();
+    lastReal_GetTickCount64.store(now);
+    ULONGLONG baseReal = baseReal_GetTickCount64.load();
+    ULONGLONG delta = SpeedFactor() * (now - baseReal);
+    ULONGLONG baseHook = baseHook_GetTickCount64.load();
+    lastHook_GetTickCount64.store(baseHook + delta);
+    return baseHook + delta;
 }
 
-static std::atomic<LARGE_INTEGER> baselineKernelQueryPerformanceCounter{};
-static std::atomic<LARGE_INTEGER> baselineDetourQueryPerformanceCounter{};
-static std::atomic<LARGE_INTEGER> prevcallKernelQueryPerformanceCounter{};
-static std::atomic<LARGE_INTEGER> prevcallDetourQueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> baseReal_QueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> baseHook_QueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> lastReal_QueryPerformanceCounter{};
+static std::atomic<LARGE_INTEGER> lastHook_QueryPerformanceCounter{};
 static std::atomic<bool> shouldUpdateQueryPerformanceCounter = false;
-BOOL WINAPI DetourQueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
+
+typedef BOOL (WINAPI* QUERYPERFORMANCECOUNTER) (LARGE_INTEGER*);
+
+static QUERYPERFORMANCECOUNTER Real_QueryPerformanceCounter = NULL;
+
+BOOL WINAPI Hook_QueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
 {
 
     if (lpPerformanceCount == NULL)
@@ -450,28 +354,31 @@ BOOL WINAPI DetourQueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
     }
     // 更新基准时间点
     bool expected = true;
-    if (shouldUpdateQueryPerformanceCounter.compare_exchange_weak(expected,
-                                                                  false))
+    if (shouldUpdateQueryPerformanceCounter.compare_exchange_weak(expected, false))
     {
-        baselineKernelQueryPerformanceCounter.store(prevcallKernelQueryPerformanceCounter.load());
-        baselineDetourQueryPerformanceCounter.store(prevcallDetourQueryPerformanceCounter.load());
+        baseReal_QueryPerformanceCounter.store(lastReal_QueryPerformanceCounter.load());
+        baseHook_QueryPerformanceCounter.store(lastHook_QueryPerformanceCounter.load());
     }
     LARGE_INTEGER now;
-    BOOL rtncode = realQueryPerformanceCounter(&now);
-    prevcallKernelQueryPerformanceCounter.store(now);
-    LARGE_INTEGER bkQpc = baselineKernelQueryPerformanceCounter.load();
-    LARGE_INTEGER bdQpc = baselineDetourQueryPerformanceCounter.load();
-    LONGLONG delta =
-        SpeedFactor() * (now.QuadPart - bkQpc.QuadPart);
+    BOOL rtncode = Real_QueryPerformanceCounter(&now);
+    lastReal_QueryPerformanceCounter.store(now);
+    LARGE_INTEGER baseReal = baseReal_QueryPerformanceCounter.load();
+    LARGE_INTEGER baseHook = baseHook_QueryPerformanceCounter.load();
+    LONGLONG delta = SpeedFactor() * (now.QuadPart - baseReal.QuadPart);
     LARGE_INTEGER result;
-    result.QuadPart = bdQpc.QuadPart + delta;
+    result.QuadPart = baseHook.QuadPart + delta;
     *lpPerformanceCount = result;
-    prevcallDetourQueryPerformanceCounter.store(result);
+    lastHook_QueryPerformanceCounter.store(result);
     return rtncode;
 }
 
-static std::atomic<LARGE_INTEGER> baselineKernelQueryPerformanceFrequency{};
-BOOL WINAPI DetourQueryPerformanceFrequency(LARGE_INTEGER* lpFrequency)
+static std::atomic<LARGE_INTEGER> baseReal_QueryPerformanceFrequency{};
+
+typedef BOOL (WINAPI* QUERYPERFORMANCEFREQUENCY) (LARGE_INTEGER*);
+
+static QUERYPERFORMANCEFREQUENCY Real_QueryPerformanceFrequency = NULL;
+
+BOOL WINAPI Hook_QueryPerformanceFrequency(LARGE_INTEGER* lpFrequency)
 {
 
     if (lpFrequency == NULL)
@@ -480,18 +387,23 @@ BOOL WINAPI DetourQueryPerformanceFrequency(LARGE_INTEGER* lpFrequency)
     }
     else
     {
-        BOOL rtncode = realQueryPerformanceFrequency(lpFrequency);
+        BOOL rtncode = Real_QueryPerformanceFrequency(lpFrequency);
         lpFrequency->QuadPart = SpeedFactor() * lpFrequency->QuadPart;
         return rtncode;
     }
 }
 
-static std::atomic<FILETIME> baselineKernelGetSystemTimeAsFileTime({ 0 });
-static std::atomic<FILETIME> baselineDetourGetSystemTimeAsFileTime({ 0 });
-static std::atomic<FILETIME> prevcallKernelGetSystemTimeAsFileTime({ 0 });
-static std::atomic<FILETIME> prevcallDetourGetSystemTimeAsFileTime({ 0 });
+static std::atomic<FILETIME> baseReal_GetSystemTimeAsFileTime({ 0 });
+static std::atomic<FILETIME> baseHook_GetSystemTimeAsFileTime({ 0 });
+static std::atomic<FILETIME> lastReal_GetSystemTimeAsFileTime({ 0 });
+static std::atomic<FILETIME> lastHook_GetSystemTimeAsFileTime({ 0 });
 static std::atomic<bool> shouldUpdateGetSystemTimeAsFileTime = false;
-VOID WINAPI DetourGetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
+
+typedef VOID (WINAPI* GETSYSTEMTIMEASFILETIME) (LPFILETIME);
+
+static GETSYSTEMTIMEASFILETIME Real_GetSystemTimeAsFileTime = NULL;
+
+VOID WINAPI Hook_GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 {
 
     if (lpSystemTimeAsFileTime == NULL)
@@ -504,42 +416,38 @@ VOID WINAPI DetourGetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
         shouldUpdateAll();
     }
     bool expected = true;
-    if (shouldUpdateGetSystemTimeAsFileTime.compare_exchange_weak(expected,
-                                                                  false))
+    if (shouldUpdateGetSystemTimeAsFileTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetSystemTimeAsFileTime.store(
-            prevcallKernelGetSystemTimeAsFileTime.load());
-        baselineDetourGetSystemTimeAsFileTime.store(
-            prevcallDetourGetSystemTimeAsFileTime.load());
+        baseReal_GetSystemTimeAsFileTime.store(lastReal_GetSystemTimeAsFileTime.load());
+        baseHook_GetSystemTimeAsFileTime.store(lastHook_GetSystemTimeAsFileTime.load());
     }
     // 从全局变量读取基准点快照到线程栈
-    FILETIME baselineKernelSnapshot = baselineKernelGetSystemTimeAsFileTime.load();
-    ULARGE_INTEGER baselineKernel = { baselineKernelSnapshot.dwLowDateTime,
-                                      baselineKernelSnapshot.dwHighDateTime
-    };
-    FILETIME baselineDetourSnapshot = baselineDetourGetSystemTimeAsFileTime.load();
-    ULARGE_INTEGER baselineDetour = { baselineDetourSnapshot.dwLowDateTime,
-                                      baselineDetourSnapshot.dwHighDateTime
-    };
+    FILETIME baseReal_Snapshot = baseReal_GetSystemTimeAsFileTime.load();
+    ULARGE_INTEGER baseReal_ = { baseReal_Snapshot.dwLowDateTime, baseReal_Snapshot.dwHighDateTime };
+    FILETIME baseHook_Snapshot = baseHook_GetSystemTimeAsFileTime.load();
+    ULARGE_INTEGER baseHook_ = { baseHook_Snapshot.dwLowDateTime, baseHook_Snapshot.dwHighDateTime };
     FILETIME ftNow = { 0 };
-    realGetSystemTimeAsFileTime(&ftNow);
-    prevcallKernelGetSystemTimeAsFileTime.store(ftNow);
+    Real_GetSystemTimeAsFileTime(&ftNow);
+    lastReal_GetSystemTimeAsFileTime.store(ftNow);
     ULARGE_INTEGER ulNow = { ftNow.dwLowDateTime, ftNow.dwHighDateTime };
-    ULONGLONG delta = SpeedFactor() * (ulNow.QuadPart - baselineKernel.QuadPart);
+    ULONGLONG delta = SpeedFactor() * (ulNow.QuadPart - baseReal_.QuadPart);
     ULARGE_INTEGER ulRtn = { 0 };
-    ulRtn.QuadPart = baselineDetour.QuadPart + delta;
-    prevcallDetourGetSystemTimeAsFileTime.store(
-        { ulRtn.LowPart, ulRtn.HighPart });
+    ulRtn.QuadPart = baseHook_.QuadPart + delta;
+    lastHook_GetSystemTimeAsFileTime.store({ ulRtn.LowPart, ulRtn.HighPart });
     (*lpSystemTimeAsFileTime) = { ulRtn.LowPart, ulRtn.HighPart };
 }
 
-static std::atomic<FILETIME> baselineKernelGetSystemTimePreciseAsFileTime({ 0 });
-static std::atomic<FILETIME> baselineDetourGetSystemTimePreciseAsFileTime({ 0 });
-static std::atomic<FILETIME> prevcallKernelGetSystemTimePreciseAsFileTime({ 0 });
-static std::atomic<FILETIME> prevcallDetourGetSystemTimePreciseAsFileTime({ 0 });
+static std::atomic<FILETIME> baseReal_GetSystemTimePreciseAsFileTime({ 0 });
+static std::atomic<FILETIME> baseHook_GetSystemTimePreciseAsFileTime({ 0 });
+static std::atomic<FILETIME> lastReal_GetSystemTimePreciseAsFileTime({ 0 });
+static std::atomic<FILETIME> lastHook_GetSystemTimePreciseAsFileTime({ 0 });
 static std::atomic<bool> shouldUpdateGetSystemTimePreciseAsFileTime = false;
-VOID WINAPI
-DetourGetSystemTimePreciseAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
+
+typedef VOID (WINAPI* GETSYSTEMTIMEPRECISEASFILETIME) (LPFILETIME);
+
+static GETSYSTEMTIMEPRECISEASFILETIME Real_GetSystemTimePreciseAsFileTime = NULL;
+
+VOID WINAPI Hook_GetSystemTimePreciseAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 {
 
     if (lpSystemTimeAsFileTime == NULL)
@@ -552,44 +460,32 @@ DetourGetSystemTimePreciseAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
         shouldUpdateAll();
     }
     bool expected = true;
-    if (shouldUpdateGetSystemTimePreciseAsFileTime.compare_exchange_weak(
-            expected, false))
+    if (shouldUpdateGetSystemTimePreciseAsFileTime.compare_exchange_weak(expected, false))
     {
-        baselineKernelGetSystemTimePreciseAsFileTime.store(
-            prevcallKernelGetSystemTimePreciseAsFileTime.load());
-        baselineDetourGetSystemTimePreciseAsFileTime.store(
-            prevcallDetourGetSystemTimePreciseAsFileTime.load());
+        baseReal_GetSystemTimePreciseAsFileTime.store(lastReal_GetSystemTimePreciseAsFileTime.load());
+        baseHook_GetSystemTimePreciseAsFileTime.store(lastHook_GetSystemTimePreciseAsFileTime.load());
     }
     // 从全局变量读取基准点快照到线程栈
-    FILETIME baselineKernelSnapshot = baselineKernelGetSystemTimePreciseAsFileTime.load();
-    ULARGE_INTEGER baselineKernel = { baselineKernelSnapshot.dwLowDateTime,
-                                      baselineKernelSnapshot.dwHighDateTime
-    };
-    FILETIME baselineDetourSnapshot = baselineDetourGetSystemTimePreciseAsFileTime.load();
-    ULARGE_INTEGER baselineDetour = { baselineDetourSnapshot.dwLowDateTime,
-                                      baselineDetourSnapshot.dwHighDateTime
-    };
+    FILETIME baseReal_Snapshot = baseReal_GetSystemTimePreciseAsFileTime.load();
+    ULARGE_INTEGER baseReal_ = { baseReal_Snapshot.dwLowDateTime, baseReal_Snapshot.dwHighDateTime };
+    FILETIME baseHook_Snapshot = baseHook_GetSystemTimePreciseAsFileTime.load();
+    ULARGE_INTEGER baseHook_ = { baseHook_Snapshot.dwLowDateTime, baseHook_Snapshot.dwHighDateTime };
     FILETIME ftNow = { 0 };
-    realGetSystemTimePreciseAsFileTime(&ftNow);
-    prevcallKernelGetSystemTimePreciseAsFileTime.store(ftNow);
-    ULARGE_INTEGER ulNow = { ftNow.dwLowDateTime,
-                             ftNow.dwHighDateTime
-    };
-    ULONGLONG delta = SpeedFactor() * (ulNow.QuadPart - baselineKernel.QuadPart);
+    Real_GetSystemTimePreciseAsFileTime(&ftNow);
+    lastReal_GetSystemTimePreciseAsFileTime.store(ftNow);
+    ULARGE_INTEGER ulNow = { ftNow.dwLowDateTime, ftNow.dwHighDateTime };
+    ULONGLONG delta = SpeedFactor() * (ulNow.QuadPart - baseReal_.QuadPart);
     ULARGE_INTEGER ulRtn = { 0 };
-    ulRtn.QuadPart = baselineDetour.QuadPart + delta;
-    prevcallDetourGetSystemTimePreciseAsFileTime.store({ ulRtn.LowPart, ulRtn.HighPart });
+    ulRtn.QuadPart = baseHook_.QuadPart + delta;
+    lastHook_GetSystemTimePreciseAsFileTime.store({ ulRtn.LowPart, ulRtn.HighPart });
     (*lpSystemTimeAsFileTime) = { ulRtn.LowPart, ulRtn.HighPart };
 }
 
-BOOL WINAPI DetourSetWaitableTimer(
-    HANDLE               hTimer,
-    const LARGE_INTEGER* lpDueTime,
-    LONG                 lPeriod,
-    PTIMERAPCROUTINE     pfnCompletionRoutine,
-    LPVOID               lpArgToCompletionRoutine,
-    BOOL                 fResume
-    )
+typedef BOOL (WINAPI* SETWAITABLETIMER) (HANDLE, const LARGE_INTEGER*, LONG, PTIMERAPCROUTINE, LPVOID, BOOL);
+
+static SETWAITABLETIMER Real_SetWaitableTimer = NULL;
+
+BOOL WINAPI Hook_SetWaitableTimer(HANDLE hTimer, const LARGE_INTEGER* lpDueTime, LONG lPeriod, PTIMERAPCROUTINE pfnCompletionRoutine, LPVOID lpArgToCompletionRoutine, BOOL fResume)
 {
     if (lpDueTime == NULL)
     {
@@ -597,23 +493,14 @@ BOOL WINAPI DetourSetWaitableTimer(
     }
     LARGE_INTEGER dueTime = {0};
     dueTime.QuadPart = lpDueTime->QuadPart / SpeedFactor();
-    return realSetWaitableTimer(hTimer,
-                                &dueTime,
-                                lPeriod,
-                                pfnCompletionRoutine,
-                                lpArgToCompletionRoutine,
-                                fResume);
+    return Real_SetWaitableTimer(hTimer, &dueTime, lPeriod, pfnCompletionRoutine, lpArgToCompletionRoutine, fResume);
 }
 
-BOOL WINAPI DetourSetWaitableTimerEx(
-    HANDLE               hTimer,
-    const LARGE_INTEGER* lpDueTime,
-    LONG                 lPeriod,
-    PTIMERAPCROUTINE     pfnCompletionRoutine,
-    LPVOID               lpArgToCompletionRoutine,
-    PREASON_CONTEXT      WakeContext,
-    ULONG                TolerableDelay
-    )
+typedef BOOL (WINAPI* SETWAITABLETIMEREX) (HANDLE, const LARGE_INTEGER*, LONG, PTIMERAPCROUTINE, LPVOID, PREASON_CONTEXT, ULONG);
+
+static SETWAITABLETIMEREX Real_SetWaitableTimerEx = NULL;
+
+BOOL WINAPI Hook_SetWaitableTimerEx(HANDLE hTimer, const LARGE_INTEGER* lpDueTime, LONG lPeriod, PTIMERAPCROUTINE pfnCompletionRoutine, LPVOID lpArgToCompletionRoutine, PREASON_CONTEXT WakeContext, ULONG TolerableDelay)
 {
     if (lpDueTime == NULL)
     {
@@ -621,13 +508,7 @@ BOOL WINAPI DetourSetWaitableTimerEx(
     }
     LARGE_INTEGER dueTime = {0};
     dueTime.QuadPart = lpDueTime->QuadPart / SpeedFactor();
-    return realSetWaitableTimerEx(hTimer,
-                                       &dueTime,
-                                       lPeriod,
-                                       pfnCompletionRoutine,
-                                       lpArgToCompletionRoutine,
-                                       WakeContext,
-                                       TolerableDelay);
+    return Real_SetWaitableTimerEx(hTimer, &dueTime, lPeriod, pfnCompletionRoutine, lpArgToCompletionRoutine, WakeContext, TolerableDelay);
 }
 
 inline VOID shouldUpdateAll()
@@ -645,9 +526,7 @@ template <typename S, typename T>
 inline VOID MH_HOOK(S* pTarget, S* pDetour, T** ppOriginal)
 {
 
-    if (MH_CreateHook(reinterpret_cast<LPVOID> (pTarget),
-                      reinterpret_cast<LPVOID> (pDetour),
-                      reinterpret_cast<LPVOID*> (ppOriginal)) != MH_OK)
+    if (MH_CreateHook(reinterpret_cast<LPVOID> (pTarget), reinterpret_cast<LPVOID> (pDetour), reinterpret_cast<LPVOID*> (ppOriginal)) != MH_OK)
     {
         MessageBoxW(NULL, L"MH装载失败", L"DLL", MB_OK);
     }
@@ -664,9 +543,7 @@ VOID MH_UNHOOK(T* pTarget)
     MH_RemoveHook(reinterpret_cast<LPVOID> (pTarget));
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule,
-                      DWORD   ul_reason_for_call,
-                      LPVOID  lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
     FILETIME now = { 0 };
     switch (ul_reason_for_call)
@@ -682,102 +559,75 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         {
             /* Initial timeGetTime */
             DWORD tgt = timeGetTime();
-            baselineKernelTimeGetTime.store(tgt);
-            prevcallKernelTimeGetTime.store(tgt);
-            baselineDetourTimeGetTime.store(tgt);
-            prevcallDetourTimeGetTime.store(tgt);
+            baseReal_TimeGetTime.store(tgt);
+            lastReal_TimeGetTime.store(tgt);
+            baseHook_TimeGetTime.store(tgt);
+            lastHook_TimeGetTime.store(tgt);
 
             /* Initial GetMessageTime */
             LONG gmt = GetMessageTime();
-            baselineKernelGetMessageTime.store(gmt);
-            prevcallKernelGetMessageTime.store(gmt);
-            baselineDetourGetMessageTime.store(gmt);
-            prevcallDetourGetMessageTime.store(gmt);
+            baseReal_GetMessageTime.store(gmt);
+            lastReal_GetMessageTime.store(gmt);
+            baseHook_GetMessageTime.store(gmt);
+            lastHook_GetMessageTime.store(gmt);
 
             /* Initial GetTickCount */
             DWORD tck = GetTickCount();
-            baselineKernelGetTickCount.store(tck);
-            prevcallKernelGetTickCount.store(tck);
-            baselineDetourGetTickCount.store(tck);
-            prevcallDetourGetTickCount.store(tck);
+            baseReal_GetTickCount.store(tck);
+            lastReal_GetTickCount.store(tck);
+            baseHook_GetTickCount.store(tck);
+            lastHook_GetTickCount.store(tck);
 
             /* Initial GetTickCount64 */
             ULONGLONG tck64 = GetTickCount64();
-            baselineKernelGetTickCount64.store(tck64);
-            prevcallKernelGetTickCount64.store(tck64);
-            baselineDetourGetTickCount64.store(tck64);
-            prevcallDetourGetTickCount64.store(tck64);
+            baseReal_GetTickCount64.store(tck64);
+            lastReal_GetTickCount64.store(tck64);
+            baseHook_GetTickCount64.store(tck64);
+            lastHook_GetTickCount64.store(tck64);
 
             /* Initial QueryPerformanceCounter */
             LARGE_INTEGER qpc;
             QueryPerformanceCounter(&qpc);
-            baselineKernelQueryPerformanceCounter.store(qpc);
-            prevcallKernelQueryPerformanceCounter.store(qpc);
-            baselineDetourQueryPerformanceCounter.store(qpc);
-            prevcallDetourQueryPerformanceCounter.store(qpc);
+            baseReal_QueryPerformanceCounter.store(qpc);
+            lastReal_QueryPerformanceCounter.store(qpc);
+            baseHook_QueryPerformanceCounter.store(qpc);
+            lastHook_QueryPerformanceCounter.store(qpc);
 
             /* Initial QueryPerformanceFrequency */
             LARGE_INTEGER qpf;
             QueryPerformanceFrequency(&qpf);
-            baselineKernelQueryPerformanceFrequency.store(qpf);
+            baseReal_QueryPerformanceFrequency.store(qpf);
 
             /* Initial GetSystemTimeAsFileTime */
             GetSystemTimeAsFileTime(&now);
-            baselineKernelGetSystemTimeAsFileTime.store(now);
-            prevcallKernelGetSystemTimeAsFileTime.store(now);
-            baselineDetourGetSystemTimeAsFileTime.store(now);
-            prevcallDetourGetSystemTimeAsFileTime.store(now);
+            baseReal_GetSystemTimeAsFileTime.store(now);
+            lastReal_GetSystemTimeAsFileTime.store(now);
+            baseHook_GetSystemTimeAsFileTime.store(now);
+            lastHook_GetSystemTimeAsFileTime.store(now);
 
             /* Initial GetSystemTimePreciseAsFileTime */
             GetSystemTimePreciseAsFileTime(&now);
-            baselineKernelGetSystemTimePreciseAsFileTime.store(now);
-            prevcallKernelGetSystemTimePreciseAsFileTime.store(now);
-        baselineDetourGetSystemTimePreciseAsFileTime.store(now);
-        prevcallDetourGetSystemTimePreciseAsFileTime.store(now);
+            baseReal_GetSystemTimePreciseAsFileTime.store(now);
+            lastReal_GetSystemTimePreciseAsFileTime.store(now);
+        baseHook_GetSystemTimePreciseAsFileTime.store(now);
+        lastHook_GetSystemTimePreciseAsFileTime.store(now);
         }
 
-        MH_HOOK(&Sleep,
-                &DetourSleep,
-                reinterpret_cast<LPVOID*> (&realSleep));
-        MH_HOOK(&SleepEx,
-                &DetourSleepEx,
-                reinterpret_cast<LPVOID*>(&realSleepEx));
+        MH_HOOK(&Sleep, &Hook_Sleep, reinterpret_cast<LPVOID*> (&Real_Sleep));
+        MH_HOOK(&SleepEx, &Hook_SleepEx, reinterpret_cast<LPVOID*>(&Real_SleepEx));
 
-        MH_HOOK(&SetWaitableTimer,
-                &DetourSetWaitableTimer,
-                reinterpret_cast<LPVOID*>(&realSetWaitableTimer));
+        MH_HOOK(&SetWaitableTimer, &Hook_SetWaitableTimer, reinterpret_cast<LPVOID*>(&Real_SetWaitableTimer));
 
-        MH_HOOK(&SetWaitableTimerEx,
-                &DetourSetWaitableTimerEx,
-                reinterpret_cast<LPVOID*>(&realSetWaitableTimerEx));
-        MH_HOOK(&SetTimer,
-                &DetourSetTimer,
-                reinterpret_cast<LPVOID*> (&realSetTimer));
-        MH_HOOK(&timeGetTime,
-                &DetourTimeGetTime,
-                reinterpret_cast<LPVOID*> (&realTimeGetTime));
-        MH_HOOK(&timeSetEvent,
-                &DetourTimeSetEvent,
-                reinterpret_cast<LPVOID*>(&realTimeSetEvent));
-        MH_HOOK(&GetMessageTime,
-                &DetourGetMessageTime,
-                reinterpret_cast<LPVOID*>(&realGetMessageTime));
-        MH_HOOK(&GetTickCount,
-                &DetourGetTickCount,
-                reinterpret_cast<LPVOID*> (&realGetTickCount));
-        MH_HOOK(&GetTickCount64,
-                &DetourGetTickCount64,
-                reinterpret_cast<LPVOID*> (&realGetTickCount64));
-        MH_HOOK(&QueryPerformanceCounter,
-                &DetourQueryPerformanceCounter,
-                reinterpret_cast<LPVOID*> (&realQueryPerformanceCounter));
-        MH_HOOK(&GetSystemTimeAsFileTime,
-                &DetourGetSystemTimeAsFileTime,
-                reinterpret_cast<LPVOID*> (&realGetSystemTimeAsFileTime));
-        MH_HOOK(&GetSystemTimePreciseAsFileTime,
-                &DetourGetSystemTimePreciseAsFileTime,
-                reinterpret_cast<LPVOID*> (
-                    &realGetSystemTimePreciseAsFileTime));
+        MH_HOOK(&SetWaitableTimerEx, &Hook_SetWaitableTimerEx, reinterpret_cast<LPVOID*>(&Real_SetWaitableTimerEx));
+        MH_HOOK(&SetTimer, &Hook_SetTimer, reinterpret_cast<LPVOID*> (&Real_SetTimer));
+        MH_HOOK(&timeGetTime, &Hook_TimeGetTime, reinterpret_cast<LPVOID*> (&Real_TimeGetTime));
+        MH_HOOK(&timeSetEvent, &Hook_TimeSetEvent, reinterpret_cast<LPVOID*>(&Real_TimeSetEvent));
+        MH_HOOK(&GetMessageTime, &Hook_GetMessageTime, reinterpret_cast<LPVOID*>(&Real_GetMessageTime));
+        MH_HOOK(&GetTickCount, &Hook_GetTickCount, reinterpret_cast<LPVOID*> (&Real_GetTickCount));
+        MH_HOOK(&GetTickCount64, &Hook_GetTickCount64, reinterpret_cast<LPVOID*> (&Real_GetTickCount64));
+        MH_HOOK(&QueryPerformanceCounter, &Hook_QueryPerformanceCounter, reinterpret_cast<LPVOID*> (&Real_QueryPerformanceCounter));
+        MH_HOOK(&GetSystemTimeAsFileTime, &Hook_GetSystemTimeAsFileTime, reinterpret_cast<LPVOID*> (&Real_GetSystemTimeAsFileTime));
+        MH_HOOK(&GetSystemTimePreciseAsFileTime, &Hook_GetSystemTimePreciseAsFileTime, reinterpret_cast<LPVOID*> (&Real_GetSystemTimePreciseAsFileTime));
 
 
         break;
@@ -793,17 +643,17 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         }
         {
             std::unique_lock<std::shared_mutex> lock(mutex);
-            MH_UNHOOK(realSleep);
-            MH_UNHOOK(realSetWaitableTimer);
-            MH_UNHOOK(realSetWaitableTimerEx);
-            MH_UNHOOK(realSetTimer);
-            MH_UNHOOK(realTimeGetTime);
-            MH_UNHOOK(realTimeSetEvent);
-            MH_UNHOOK(realGetTickCount);
-            MH_UNHOOK(realGetTickCount64);
-            MH_UNHOOK(realQueryPerformanceCounter);
-            MH_UNHOOK(realGetSystemTimeAsFileTime);
-            MH_UNHOOK(realGetSystemTimePreciseAsFileTime);
+            MH_UNHOOK(Real_Sleep);
+            MH_UNHOOK(Real_SetWaitableTimer);
+            MH_UNHOOK(Real_SetWaitableTimerEx);
+            MH_UNHOOK(Real_SetTimer);
+            MH_UNHOOK(Real_TimeGetTime);
+            MH_UNHOOK(Real_TimeSetEvent);
+            MH_UNHOOK(Real_GetTickCount);
+            MH_UNHOOK(Real_GetTickCount64);
+            MH_UNHOOK(Real_QueryPerformanceCounter);
+            MH_UNHOOK(Real_GetSystemTimeAsFileTime);
+            MH_UNHOOK(Real_GetSystemTimePreciseAsFileTime);
         }
         // Wait for All threads to finish detour api
         Sleep(1000);

@@ -74,7 +74,7 @@
   },
   "settings": {
     "loading": "設定を読み込み中…",
-    "speedShortcuts": "速度ショートカット",
+    "speedShortcuts": "速度アップ/ダウン",
     "shortcut": "ショートカット",
     "step": "ステップ",
     "increase": "加速",
@@ -82,7 +82,7 @@
     "reset": "リセット",
     "confirm": "確認",
     "cancel": "キャンセル",
-    "gears": "ギアプリセット",
+    "gears": "変速ギア",
     "hold": "長押し",
     "gear": "ギア",
     "multiplier": "倍率",

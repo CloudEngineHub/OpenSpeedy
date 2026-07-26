@@ -74,7 +74,7 @@
   },
   "settings": {
     "loading": "설정 로딩 중…",
-    "speedShortcuts": "속도 단축키",
+    "speedShortcuts": "속도 증감",
     "shortcut": "단축키",
     "step": "단계",
     "increase": "증가",
@@ -82,7 +82,7 @@
     "reset": "초기화",
     "confirm": "확인",
     "cancel": "취소",
-    "gears": "기어 프리셋",
+    "gears": "변속 기어",
     "hold": "길게 누르기",
     "gear": "기어",
     "multiplier": "배율",

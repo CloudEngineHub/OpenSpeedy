@@ -18,7 +18,6 @@
 #ifndef SPEEDPATCH_H
 #define SPEEDPATCH_H
 #include <windows.h>
-#include <string>
 
 #if defined(SPEEDPATCH_LIBRARY)
 #define SPEEDPATCH_API __declspec(dllexport)
@@ -26,11 +25,8 @@
 #define SPEEDPATCH_API __declspec(dllimport)
 #endif
 
-std::wstring
-GetCurrentProcessName();
-
-std::wstring
-GetProcessFileMapName(DWORD processId);
+VOID
+GetProcessFileMapName(DWORD processId, WCHAR* buf, DWORD bufSize);
 
 extern "C"
 {
