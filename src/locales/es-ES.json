@@ -97,6 +97,10 @@
     "author": "Autor",
     "license": "Licencia",
     "version": "Versión",
-    "system": "Sistema"
+    "system": "Sistema",
+    "socialLinks": "Enlaces sociales",
+    "copyInfoSuccess": "Información del sistema copiada. Lista para pegar en el informe.",
+    "copyInfoError": "Error al copiar. Copie manualmente.",
+    "copyInfo": "Info del sistema"
   }
 }

@@ -97,6 +97,10 @@
     "author": "Author",
     "license": "License",
     "version": "Version",
-    "system": "System"
+    "system": "System",
+    "socialLinks": "Social Links",
+    "copyInfoSuccess": "System info copied. Ready to paste into issue report.",
+    "copyInfoError": "Failed to copy system info. Please copy manually.",
+    "copyInfo": "System Info"
   }
 }

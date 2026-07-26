@@ -99,6 +99,10 @@
     "author": "作者",
     "license": "授權",
     "version": "版本",
-    "system": "系統"
+    "system": "系統",
+    "socialLinks": "社交連結",
+    "copyInfoSuccess": "已複製軟體資訊，準備貼上到問題報告。",
+    "copyInfoError": "複製軟體資訊失敗，請手動複製。",
+    "copyInfo": "軟體資訊"
   }
 }

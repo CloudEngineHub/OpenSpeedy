@@ -99,6 +99,10 @@
     "author": "제작자",
     "license": "라이선스",
     "version": "버전",
-    "system": "시스템"
+    "system": "시스템",
+    "socialLinks": "소셜 링크",
+    "copyInfoSuccess": "시스템 정보를 복사했습니다. 문제 보고서에 붙여넣으세요.",
+    "copyInfoError": "시스템 정보 복사에 실패했습니다. 수동으로 복사하세요.",
+    "copyInfo": "시스템 정보"
   }
 }

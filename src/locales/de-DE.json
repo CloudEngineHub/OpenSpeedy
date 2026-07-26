@@ -99,6 +99,10 @@
     "author": "Autor",
     "license": "Lizenz",
     "version": "Version",
-    "system": "System"
+    "system": "System",
+    "socialLinks": "Soziale Links",
+    "copyInfoSuccess": "Systeminformationen kopiert. Bereit zum Einfügen.",
+    "copyInfoError": "Kopieren fehlgeschlagen. Bitte manuell kopieren.",
+    "copyInfo": "Systeminfo"
   }
 }

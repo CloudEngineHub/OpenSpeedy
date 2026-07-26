@@ -97,6 +97,10 @@
     "author": "Auteur",
     "license": "Licentie",
     "version": "Versie",
-    "system": "Systeem"
+    "system": "Systeem",
+    "socialLinks": "Sociale links",
+    "copyInfoSuccess": "Systeeminfo gekopieerd. Klaar om te plakken.",
+    "copyInfoError": "Kopiëren mislukt. Kopieer handmatig.",
+    "copyInfo": "Systeeminfo"
   }
 }

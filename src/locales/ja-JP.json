@@ -99,6 +99,10 @@
     "author": "作者",
     "license": "ライセンス",
     "version": "バージョン",
-    "system": "システム"
+    "system": "システム",
+    "socialLinks": "ソーシャルリンク",
+    "copyInfoSuccess": "システム情報をコピーしました。問題報告に貼り付けてください。",
+    "copyInfoError": "システム情報のコピーに失敗しました。手動でコピーしてください。",
+    "copyInfo": "システム情報"
   }
 }

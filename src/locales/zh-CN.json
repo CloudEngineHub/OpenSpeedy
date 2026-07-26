@@ -97,6 +97,10 @@
     "author": "作者",
     "license": "协议",
     "version": "版本",
-    "system": "系统"
+    "system": "系统",
+    "socialLinks": "社交链接",
+    "copyInfoSuccess": "已复制软件信息，准备粘贴到问题报告。",
+    "copyInfoError": "复制软件信息失败，请手动复制。",
+    "copyInfo": "软件信息"
   }
 }

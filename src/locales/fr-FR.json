@@ -99,6 +99,10 @@
     "author": "Auteur",
     "license": "Licence",
     "version": "Version",
-    "system": "Système"
+    "system": "Système",
+    "socialLinks": "Liens sociaux",
+    "copyInfoSuccess": "Informations système copiées. Prêt à coller dans le rapport.",
+    "copyInfoError": "Échec de la copie. Veuillez copier manuellement.",
+    "copyInfo": "Infos système"
   }
 }

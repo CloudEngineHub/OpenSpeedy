@@ -237,7 +237,7 @@ export default function SettingsManager() {
             invoke("set_always_on_top", { onTop: v });
           }} />
         </Row>
-        <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><LanguageIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.language")}</Box>}>
+        <Row label={<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}><LanguageIcon sx={{ fontSize: 16, color: "text.secondary" }} />{t("settings.language")} / Language </Box>}>
           <Select size="small" value={settings.language} onChange={e => { const lng = e.target.value as SettingsState["language"]; set("language", lng); i18n.changeLanguage(lng); }} sx={{ minWidth: 140 }}>
             <MenuItem value="zh-CN">中文（简体）</MenuItem>
             <MenuItem value="zh-TW">中文（繁體）</MenuItem>

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { getVersion } from "@tauri-apps/api/app";
-import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch, Chip, IconButton } from "@mui/material";
+import { getVersion, getName, getTauriVersion } from "@tauri-apps/api/app";
+import { platform, arch, version as osVersion } from "@tauri-apps/plugin-os";
+import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Typography, Paper, Switch, Chip, IconButton, Button, Divider } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SpeedIcon from "@mui/icons-material/Speed";
@@ -9,6 +10,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import InfoIcon from "@mui/icons-material/Info";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TitleBar from "./components/TitleBar";
 import appIcon from "../src-tauri/icons/icon.png";
 import githubIcon from "./assets/github.svg";
@@ -18,7 +20,7 @@ import SettingsManager from "./components/SettingsManager";
 import { useShortcut } from "./hooks/useShortcut";
 import { useTray } from "./hooks/useTray";
 import { useSettings } from "./hooks/useSettings";
-import { SnackbarProvider } from "./contexts/SnackbarContext";
+import { useSnackbar } from "./contexts/SnackbarContext";
 
 import { useInterval } from "ahooks";
 import { invoke } from "@tauri-apps/api/core";
@@ -31,18 +33,42 @@ function App() {
   const [memPct, setMemPct] = useState(0);
   const [osVer, setOsVer] = useState("");
   const [version, setVersion] = useState("");
+  const [appName, setAppName] = useState("");
+  const [tauriVersion, setTauriVersion] = useState("");
+  const [platformType, setPlatformType] = useState("");
+  const [platformArch, setPlatformArch] = useState("");
+  const [platformVersion, setPlatformVersion] = useState("");
   const [b64, setB64] = useState<boolean | null>(null);
   const [b32, setB32] = useState<boolean | null>(null);
   const [gpuName, setGpuName] = useState("");
   const [gpuUsedMb, setGpuUsedMb] = useState(0);
   const [gpuTotalMb, setGpuTotalMb] = useState(0);
   const { settings, set } = useSettings();
+  const { notify } = useSnackbar();
   const darkMode = settings?.theme === "dark";
 
   // Sync Blueprint dark mode class
   useEffect(() => {
     document.body.classList.toggle("bp5-dark", darkMode);
   }, [darkMode]);
+
+  const handleCopySystemInfo = async () => {
+    try {
+      const issueInfo = {
+        appName,
+        appVersion: version,
+        tauriVersion,
+        platform: platformType,
+        platformArch,
+        platformVersion,
+      };
+      const issueJson = JSON.stringify(issueInfo, null, 2);
+      await navigator.clipboard.writeText(issueJson);
+      notify(t("about.copyInfoSuccess"), "success");
+    } catch (error) {
+      notify(t("about.copyInfoError"), "error");
+    }
+  };
 
   const theme = useMemo(() => createTheme({
     palette: {
@@ -97,6 +123,11 @@ function App() {
     invoke<{ memory_pct: number; cpu_pct: number; os_version: string; gpu: { name: string; used_mb: number; total_mb: number } | null }>("get_system_stats")
       .then(s => { setMemPct(s.memory_pct); setCpuPct(s.cpu_pct); setOsVer(s.os_version); if (s.gpu) { setGpuName(s.gpu.name); setGpuUsedMb(s.gpu.used_mb); setGpuTotalMb(s.gpu.total_mb); } }).catch(() => {});
     getVersion().then(setVersion).catch(() => {});
+    getName().then(setAppName).catch(() => {});
+    getTauriVersion().then(setTauriVersion).catch(() => {});
+    Promise.all([platform(), arch(), osVersion()])
+      .then(([pt, pa, pv]) => { setPlatformType(pt); setPlatformArch(pa); setPlatformVersion(pv); })
+      .catch(() => { setPlatformType("windows"); setPlatformArch("x86_64"); setPlatformVersion("unknown"); });
     invoke<boolean>("bridge64_health").catch(() => false).then(setB64);
     invoke<boolean>("bridge32_health").catch(() => false).then(setB32);
   }, []);
@@ -104,7 +135,6 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <SnackbarProvider>
       <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
         <TitleBar osVer={osVer} cpuPct={cpuPct} memPct={memPct} gpuName={gpuName} gpuUsedMb={gpuUsedMb} gpuTotalMb={gpuTotalMb} />
 
@@ -140,9 +170,26 @@ function App() {
               <Box sx={{ flex: 1, width: "100%", overflow: "auto" }}>
                 <Box sx={{ maxWidth: 400, mx: "auto", mt: 8, textAlign: "center", px: 2 }}>
                   <Box component="img" src={appIcon} sx={{ width: 80, height: 80, mb: 1 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>OpenSpeedy</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                    {t("about.description")}
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      fontStyle: "italic",
+                      mb: 4,
+                      letterSpacing: 0.25,
+                      lineHeight: 1.1,
+                      background: darkMode
+                        ? "linear-gradient(110deg, #FF4500 0%, #FF8C00 28%, #FFD700 52%, #FF6F00 76%, #E64A19 100%)"
+                        : "linear-gradient(110deg, #FF4500 0%, #FF8C00 28%, #FFD700 52%, #FF6F00 76%, #E64A19 100%)",
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      color: "transparent",
+                      textShadow: darkMode
+                        ? "1px 1px 0 rgba(230,74,25,0.55), 2px 2px 0 rgba(255,140,0,0.35), 4px 4px 12px rgba(0,0,0,0.32)"
+                        : "1px 1px 0 rgba(230,74,25,0.38), 2px 2px 0 rgba(255,140,0,0.24), 4px 4px 10px rgba(0,0,0,0.16)",
+                    }}
+                  >
+                    OpenSpeedy
                   </Typography>
 
                   <Paper elevation={0} sx={{ p: 2.5, bgcolor: "background.paper", border: 1, borderColor: "divider", textAlign: "left" }}>
@@ -154,11 +201,11 @@ function App() {
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>{t("about.license")}</Typography>
                       <Typography variant="body2">GPL v3</Typography>
                     </Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderTop: 1, borderColor: "divider" }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderBottom: 1, borderColor: "divider" }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>{t("about.version")}</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>v{version}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>{version}</Typography>
                     </Box>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderTop: 1, borderColor: "divider" }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderColor: "divider" }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>{t("about.system")}</Typography>
                       <Typography variant="caption" color="text.secondary">{osVer}</Typography>
                     </Box>
@@ -166,23 +213,43 @@ function App() {
 
                   </Paper>
 
-                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mt: 3 }}>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<ContentCopyIcon />}
+                      onClick={handleCopySystemInfo}
+                      sx={{ textTransform: "none" }}
+                    >
+                      {t("about.copyInfo")}
+                    </Button>
+                  </Box>
+
+                  <Divider sx={{ mt: 2.5, mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("about.socialLinks")}
+                    </Typography>
+                  </Divider>
+
+                  <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
                     <IconButton
                       onClick={() => open("https://github.com/game1024")}
                       sx={{
                         width: 44, height: 44,
                         border: 1, borderColor: "divider",
-                        "&:hover": { bgcolor: "action.hover", borderColor: "primary.main" },
+                        bgcolor: darkMode ? "rgba(255,255,255,0.92)" : "background.paper",
+                        "&:hover": { bgcolor: darkMode ? "rgba(255,255,255,0.76)" : "action.hover", borderColor: "primary.main" },
                       }}
                     >
-                      <Box component="img" src={githubIcon} sx={{ width: 22, height: 22, filter: darkMode ? "invert(1)" : "none" }} />
+                      <Box component="img" src={githubIcon} sx={{ width: 22, height: 22}} />
                     </IconButton>
                     <IconButton
                       onClick={() => open("https://buymeacoffee.com/game1024")}
                       sx={{
                         width: 44, height: 44,
                         border: 1, borderColor: "divider",
-                        "&:hover": { bgcolor: "action.hover", borderColor: "primary.main" },
+                        bgcolor: darkMode ? "rgba(255,255,255,0.92)" : "background.paper",
+                        "&:hover": { bgcolor: darkMode ? "rgba(255,255,255,0.76)" : "action.hover", borderColor: "primary.main" },
                       }}
                     >
                       <Box component="img" src={bmcIcon} sx={{ width: 22, height: 22 }} />
@@ -194,7 +261,6 @@ function App() {
           </Box>
         </Box>
       </Box>
-      </SnackbarProvider>
     </ThemeProvider>
   );
 }
