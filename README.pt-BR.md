@@ -63,7 +63,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -155,9 +155,9 @@ Se encontrar problemas, entre em contato via:
 - [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — Verifique a wiki primeiro para problemas comuns
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Envie relatórios de bugs. Por favor, não envie issues relacionadas a armazenamento em nuvem, obrigado! 🙏
 
-# 📄 Licença
+# Licença
 
-OpenSpeedy é licenciado sob a licença GPL v3.
+OpenSpeedy é licenciado sob a licença [GPL v3](LICENSE).
 
 # 🙏 Agradecimentos
 

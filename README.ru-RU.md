@@ -72,7 +72,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -170,8 +170,8 @@ OpenSpeedy изменяет скорость игры, перехватывая 
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Отправляйте сообщения об ошибках. Пожалуйста, не создавайте тикеты по вопросам облачных хранилищ, спасибо за сотрудничество~ 🙏
 
 
-# 📜 Лицензия
-OpenSpeedy распространяется под лицензией GPL v3.
+# Лицензия
+OpenSpeedy распространяется под лицензией [GPL v3](LICENSE).
 
 # 🙏 Благодарности
 OpenSpeedy использует исходный код следующих проектов. Благодарим сообщество открытого исходного кода! Если OpenSpeedy вам помог, поставьте звезду!

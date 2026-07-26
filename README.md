@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  最好用的开源游戏变速器
+  The Best Open-Source Game Speed Controller
 </p>
 
 <p align="center">
@@ -45,7 +45,7 @@
   <br/>
   
   <a href="https://github.com/game1024/OpenSpeedy/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="提交活跃度">
+    <img src="https://img.shields.io/github/commit-activity/m/game1024/OpenSpeedy?style=for-the-badge" alt="Commit Activity">
   </a>
   <img src="https://img.shields.io/badge/language-C/C++-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/License-GPLv3-green.svg?style=for-the-badge">
@@ -78,110 +78,109 @@
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ko-KR.md">한국어</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.pt-BR.md">Português (BR)</a>
-  <br/>
+  <br/> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ru-RU.md">Русский</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.es-ES.md">Español</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.nl-NL.md">Nederlands</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.hi-IN.md">हिन्दी</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.zh-TW.md">繁體中文</a> |
-  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">简体中文</a>
+  <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.zh-CN.md">简体中文</a>
 </p>
 
 
-# 🚀 特性
-- 快捷变速
-- 现代化UI
-- 同时可以支持x86和x64平台进程
-- 无内核侵入性，Ring3层Hook，不破坏系统内核
+# 🚀 Features
+- Quick speed adjustment
+- Modern UI
+- Supports both x86 and x64 platform processes
+- No kernel intrusion — Ring-3 level hooking, does not tamper with the system kernel
 
 
-# 💾 安装
-📦 **方式1: Winget**
+# 💾 Installation
+📦 **Method 1: Winget**
 
 ``` powershell
-# 安装命令如下
+# Install command
 winget install openspeedy
 
-# 打开一个新的终端，运行openspeedy
+# Open a new terminal and run openspeedy
 openspeedy
 ```
 
-📥 **方式2: 手动下载**
+📥 **Method 2: Manual Download**
 
-访问 [安装页面](https://github.com/game1024/OpenSpeedy/releases) 下载最新版本
-
-
-# 💻 操作系统要求
-- OS: Windows10 以上
-- 平台：x86（32位） 和 x64 （64位）
+Visit the [Releases page](https://github.com/game1024/OpenSpeedy/releases) to download the latest version.
 
 
-# 📝 使用说明
-1. 启动 OpenSpeedy
-2. 运行需要变速的目标游戏
+# 💻 System Requirements
+- OS: Windows 10 or later
+- Platform: x86 (32-bit) and x64 (64-bit)
+
+
+# 📝 Usage
+1. Launch OpenSpeedy
+2. Run the target game you want to speed up
 <img src="https://github.com/user-attachments/assets/648e721d-9c3a-4d82-954c-19b16355d084" width="50%">
 
-3. 勾选游戏进程，在 OpenSpeedy 界面中调整速度倍率
+3. Select the game process and adjust the speed multiplier in the OpenSpeedy interface
 <img src="https://github.com/user-attachments/assets/9cd56353-1906-44c5-ba29-b5b4d2db2b80" width="50%"/>
 
-
-4. 即刻生效，对比效果如下
+4. Takes effect immediately — see the comparison below
 
 <video src="https://github.com/user-attachments/assets/7c75e37d-bc7a-4639-89a0-a34a21676cba" width="70%"></video>
 
-# 🔧 技术原理
+# 🔧 How It Works
 
-编译环境要求：
+Prerequisites:
 - [Node.js](https://nodejs.org/) 18+
 - [Rust](https://www.rust-lang.org/)
 - [CMake](https://cmake.org/)
-- [Visual Studio](https://visualstudio.microsoft.com/)（含 C++ 桌面开发工作负载）
+- [Visual Studio](https://visualstudio.microsoft.com/) (with C++ desktop development workload)
 
-编译命令：
+Build command:
 
 ``` powershell
 npm run tauri dev
 ```
 
-OpenSpeedy 通过 Hook 以下 Windows 系统时间函数来实现游戏速度调整：
+OpenSpeedy adjusts game speed by hooking the following Windows system time functions:
 
-|函数名	| 所属库 |	功能 |
-|--------|----------|------------------|
-|Sleep|user32.dll|线程休眠|
-|SetTimer|user32.dll|创建基于消息的计时器|
-|timeGetTime | winmm.dll	| 获取系统启动后经过的毫秒数 |
-|GetTickCount | kernel32.dll	| 获取系统启动后经过的毫秒数 |
-|GetTickCount64	| kernel32.dll	| 获取系统启动后经过的毫秒数(64位) |
-|QueryPerformanceCounter |	kernel32.dll	| 高精度性能计数器 |
-|GetSystemTimeAsFileTime |	kernel32.dll	| 获取系统时间 |
-|GetSystemTimePreciseAsFileTime |	kernel32.dll	| 获取高精度系统时间 |
-|SetWaitableTimer |	kernel32.dll	| 设置可等待定时器 |
-|SetWaitableTimerEx |	kernel32.dll	| 设置可等待定时器(扩展) |
+| Function | Library | Purpose |
+|----------|---------|---------|
+| Sleep | user32.dll | Thread sleep |
+| SetTimer | user32.dll | Creates message-based timers |
+| timeGetTime | winmm.dll | Retrieves system uptime in milliseconds |
+| GetTickCount | kernel32.dll | Retrieves system uptime in milliseconds |
+| GetTickCount64 | kernel32.dll | Retrieves system uptime in milliseconds (64-bit) |
+| QueryPerformanceCounter | kernel32.dll | High-resolution performance counter |
+| GetSystemTimeAsFileTime | kernel32.dll | Retrieves system time |
+| GetSystemTimePreciseAsFileTime | kernel32.dll | Retrieves high-precision system time |
+| SetWaitableTimer | kernel32.dll | Sets a waitable timer |
+| SetWaitableTimerEx | kernel32.dll | Sets a waitable timer (extended) |
 
-# ⚠️ 注意事项
-- 本工具仅供学习和研究使用
-- 部分在线游戏可能有反作弊系统，使用本工具可能导致账号被封禁
-- 过度加速可能导致游戏物理引擎异常或崩溃
-- 不建议在竞技类在线游戏中使用
-- 开源产品不带数字签名，可能被杀毒软件误报
+# ⚠️ Warnings
+- This tool is for educational and research purposes only
+- Some online games have anti-cheat systems — using this tool may result in account bans
+- Excessive speed may cause game physics engine glitches or crashes
+- Not recommended for use in competitive online games
+- Open-source software without digital signatures may trigger false positives from antivirus software
 
-# 🔄 反馈
-如果在使用过程中遇到任何问题，欢迎通过以下方式反馈：
-- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) - 先查看wiki定位常见问题
-- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) - 提交问题报告, 网盘类问题请勿提issue, 我不支持, 谢谢合作～🙏
+# 🔄 Feedback
+If you encounter any issues, please reach out via:
+- [FAQ](https://github.com/game1024/OpenSpeedy/wiki#faq) — Check the wiki first for common issues
+- [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — Submit bug reports. Please do not submit cloud storage related issues, thank you for your cooperation~ 🙏
 
 
-# 📜 开源协议
-OpenSpeedy 遵循 GPL v3 许可证。
+# License
+OpenSpeedy is licensed under the [GPL v3](LICENSE) license.
 
-# 🙏 鸣谢
-OpenSpeedy使用到以下项目的源码，感谢开源社区的力量，如果OpenSpeedy对你有帮助，欢迎Star!
-- [minhook](https://github.com/TsudaKageyu/minhook): 用于API Hook
-- [tauri](https://tauri.app/): GUI
-- [MUI](https://mui.com/): UI 组件库
-- [Ant Design](https://ant.design/): UI 分割面板组件
+# 🙏 Acknowledgments
+OpenSpeedy uses source code from the following projects. Thanks to the open-source community! If OpenSpeedy helps you, a Star is welcome!
+- [minhook](https://github.com/TsudaKageyu/minhook): For API hooking
+- [tauri](https://tauri.app/): GUI framework
+- [MUI](https://mui.com/): UI component library
+- [Ant Design](https://ant.design/): UI splitter component
 
-免责声明: OpenSpeedy 仅用于教育和研究目的。用户应自行承担使用本软件的所有风险和责任。作者不对因使用本软件导致的任何损失或法律责任负责。
+Disclaimer: OpenSpeedy is intended for educational and research purposes only. Users assume all risks and liabilities associated with the use of this software. The author is not responsible for any loss or legal liability arising from the use of this software.
 
 <a href="https://openomy.com/game1024/openspeedy" target="_blank" style="display: block; width: 100%;" align="center">
   <img src="https://openomy.com/svg?repo=game1024/openspeedy&chart=bubble&latestMonth=6" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />

@@ -72,7 +72,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -170,8 +170,8 @@ OpenSpeedy निम्नलिखित Windows सिस्टम समय �
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — बग रिपोर्ट सबमिट करें। कृपया क्लाउड स्टोरेज से जुड़े मुद्दे न डालें, सहयोग के लिए धन्यवाद~ 🙏
 
 
-# 📜 लाइसेंस
-OpenSpeedy GPL v3 लाइसेंस के अंतर्गत लाइसेंस प्राप्त है।
+# लाइसेंस
+OpenSpeedy [GPL v3](LICENSE) लाइसेंस के अंतर्गत लाइसेंस प्राप्त है।
 
 # 🙏 आभार
 OpenSpeedy निम्नलिखित परियोजनाओं के स्रोत कोड का उपयोग करता है। ओपन-सोर्स समुदाय को धन्यवाद! यदि OpenSpeedy आपकी मदद करता है, तो स्टार देना न भूलें!

@@ -72,7 +72,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -170,8 +170,8 @@ OpenSpeedy は以下の Windows システム時間関数をフックすること
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — バグ報告を提出してください。クラウドストレージ関連の問題は提出しないでください。ご協力ありがとうございます～🙏
 
 
-# 📜 ライセンス
-OpenSpeedy は GPL v3 ライセンスに基づいています。
+# ライセンス
+OpenSpeedy は [GPL v3](LICENSE) ライセンスに基づいています。
 
 # 🙏 謝辞
 OpenSpeedy は以下のプロジェクトのソースコードを使用しています。オープンソースコミュニティに感謝します！OpenSpeedy がお役に立ったら、Star をお願いします！

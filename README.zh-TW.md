@@ -72,7 +72,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -170,8 +170,8 @@ OpenSpeedy 透過 Hook 以下 Windows 系統時間函式來實現遊戲速度調
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — 提交問題回報，雲端硬碟類問題請勿提 issue，感謝合作～🙏
 
 
-# 📜 開源授權
-OpenSpeedy 遵循 GPL v3 授權條款。
+# 開源授權
+OpenSpeedy 遵循 [GPL v3](LICENSE) 授權條款。
 
 # 🙏 致謝
 OpenSpeedy 使用到以下專案的原始碼，感謝開源社群的力量，如果 OpenSpeedy 對你有幫助，歡迎 Star！

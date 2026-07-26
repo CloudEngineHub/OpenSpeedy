@@ -72,7 +72,7 @@
 </p>
 
 <p align="center">
-  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.en-US.md">English</a> |
+  🌐 <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.md">English</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.de-DE.md">Deutsch</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.fr-FR.md">Français</a> |
   <a href="https://github.com/game1024/OpenSpeedy/blob/master/README.ja-JP.md">日本語</a> |
@@ -170,8 +170,8 @@ OpenSpeedy는 다음 Windows 시스템 시간 함수를 후킹하여 게임 속�
 - [GitHub Issues](https://github.com/game1024/OpenSpeedy/issues) — 버그 리포트를 제출해 주세요. 클라우드 스토리지 관련 문제는 제출하지 말아 주세요. 협조해 주셔서 감사합니다~ 🙏
 
 
-# 📜 라이선스
-OpenSpeedy는 GPL v3 라이선스를 따릅니다.
+# 라이선스
+OpenSpeedy는 [GPL v3](LICENSE) 라이선스를 따릅니다.
 
 # 🙏 감사의 말
 OpenSpeedy는 다음 프로젝트의 소스 코드를 사용합니다. 오픈소스 커뮤니티에 감사드립니다! OpenSpeedy가 도움이 되셨다면 Star를 부탁드립니다!
