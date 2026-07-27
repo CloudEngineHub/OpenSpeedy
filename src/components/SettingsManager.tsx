@@ -252,7 +252,6 @@ export default function SettingsManager() {
             <MenuItem value="ja-JP">日本語</MenuItem>
             <MenuItem value="ko-KR">한국어</MenuItem>
             <MenuItem value="de-DE">Deutsch</MenuItem>
-            <MenuItem value="de-CH">Deutsch (CH)</MenuItem>
             <MenuItem value="fr-FR">Français</MenuItem>
             <MenuItem value="nl-NL">Nederlands</MenuItem>
             <MenuItem value="es-ES">Español</MenuItem>

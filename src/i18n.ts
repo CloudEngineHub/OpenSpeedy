@@ -10,13 +10,12 @@ import frFR from "./locales/fr-FR.json";
 import enUS from "./locales/en-US.json";
 import ruRU from "./locales/ru-RU.json";
 import hiIN from "./locales/hi-IN.json";
-import deCH from "./locales/de-CH.json";
 import nlNL from "./locales/nl-NL.json";
 import ptBR from "./locales/pt-BR.json";
 import esES from "./locales/es-ES.json";
 
 const SUPPORTED = [
-  "zh-CN", "zh-TW", "ja-JP", "ko-KR", "de-DE", "de-CH",
+  "zh-CN", "zh-TW", "ja-JP", "ko-KR", "de-DE",
   "fr-FR", "en-US", "ru-RU", "hi-IN", "nl-NL", "pt-BR", "es-ES",
 ] as const;
 
@@ -45,7 +44,7 @@ export function mapSystemLocale(raw: string | null): string {
   const LANG_MAP: Record<string, string> = {
     ja: "ja-JP",
     ko: "ko-KR",
-    de: l.includes("ch") ? "de-CH" : "de-DE",
+    de: "de-DE",
     fr: "fr-FR",
     en: "en-US",
     ru: "ru-RU",
@@ -69,7 +68,6 @@ i18n.use(initReactI18next).init({
     "en-US": { translation: enUS },
     "ru-RU": { translation: ruRU },
     "hi-IN": { translation: hiIN },
-    "de-CH": { translation: deCH },
     "nl-NL": { translation: nlNL },
     "pt-BR": { translation: ptBR },
     "es-ES": { translation: esES },

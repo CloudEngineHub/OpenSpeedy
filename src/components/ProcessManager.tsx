@@ -29,7 +29,7 @@ interface ProcessInfo {
 }
 
 const ROW_H = 36;
-const COL = { pid: 64, mem: 80, check: 80 } as const;
+const COL = { pid: 64, mem: 108, check: 96 } as const;
 
 type SortCol = "pid" | "name" | "memory" | "enabled" | "count" | null;
 
@@ -82,7 +82,7 @@ const ProcessRow = React.memo(function ProcessRow({
         </Box>
       </Box>
       {showMem && <Typography variant="body2" color="text.secondary" sx={{ textAlign: "right", pr: 1, fontSize: "0.8rem" }}>{formatMem(p.memory_kb)}</Typography>}
-      <Box sx={{ textAlign: "center" }}><Switch size="small" checked={on} onChange={() => onToggle(p.pid, p.arch)} /></Box>
+      <Box sx={{ textAlign: "right", pr: 1 }}><Switch size="small" checked={on} onChange={() => onToggle(p.pid, p.arch)} /></Box>
     </Box>
   );
 }, (prev, next) =>
@@ -187,14 +187,14 @@ const ProcessTable = function ProcessTable({
         <Table size="small" sx={{ tableLayout: "fixed", flexShrink: 0 }}>
           <colgroup>
             <col width={COL.pid} /><col />
-            {isPid && <col width={COL.mem} />}
-            <col width={COL.check} />
+            {isPid && <col width={COL.mem} style={{ textAlign: "right" }} />}
+            <col width={COL.check} style={{ textAlign: "right" }} />
           </colgroup>
           <TableHead><TableRow>
             <TableCell onClick={() => toggleSort(isPid ? "pid" : "count")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{isPid ? t("process.pid") : t("process.count")}{sortIcon(isPid ? "pid" : "count")}</TableCell>
             <TableCell onClick={() => toggleSort("name")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.name")}{sortIcon("name")}</TableCell>
-            {isPid && <TableCell onClick={() => toggleSort("memory")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.memory")}{sortIcon("memory")}</TableCell>}
-            <TableCell align="center" onClick={() => toggleSort("enabled")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.enable")}{sortIcon("enabled")}</TableCell>
+            {isPid && <TableCell align="right" onClick={() => toggleSort("memory")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.memory")}{sortIcon("memory")}</TableCell>}
+            <TableCell align="right" onClick={() => toggleSort("enabled")} sx={{ cursor: "pointer", userSelect: "none", fontSize: "0.75rem", py: 0.5 }}>{t("process.enable")}{sortIcon("enabled")}</TableCell>
           </TableRow></TableHead>
         </Table>
 
@@ -226,7 +226,7 @@ const ProcessTable = function ProcessTable({
                         <Typography variant="body2" noWrap sx={{ fontWeight: 500, fontSize: "0.8rem" }}>{name}</Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ textAlign: "center" }}><Switch size="small" checked={group.anyEnabled} onChange={() => onToggleName(name)} /></Box>
+                    <Box sx={{ textAlign: "right", pr: 1 }}><Switch size="small" checked={group.anyEnabled} onChange={() => onToggleName(name)} /></Box>
                   </Box>
                 );
               })}
