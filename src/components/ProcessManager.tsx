@@ -29,7 +29,7 @@ interface ProcessInfo {
 }
 
 const ROW_H = 36;
-const COL = { pid: 64, mem: 108, check: 96 } as const;
+const COL = { pid: 80, mem: 108, check: 96 } as const;
 
 type SortCol = "pid" | "name" | "memory" | "enabled" | "count" | null;
 
@@ -313,7 +313,7 @@ export default function ProcessManager() {
         invoke<boolean>("bridge_inject", { pid: p.pid, arch }).catch(() => {});
       }
     }
-  }, 5000);
+  }, 1000);
 
   // Filter
   const filtered = useMemo(() => {

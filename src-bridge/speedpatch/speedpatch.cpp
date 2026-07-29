@@ -179,6 +179,54 @@ DWORD WINAPI Hook_SleepEx(DWORD dwMilliseconds, BOOL bAlertable)
     return Real_SleepEx(dwMilliseconds / SpeedFactor(), bAlertable);
 }
 
+typedef DWORD (WINAPI* WAITFORSINGLEOBJECT) (HANDLE, DWORD);
+
+static WAITFORSINGLEOBJECT Real_WaitForSingleObject = NULL;
+
+DWORD WINAPI Hook_WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds)
+{
+    if (dwMilliseconds == 0 || dwMilliseconds == INFINITE) {
+        return Real_WaitForSingleObject(hHandle, dwMilliseconds);
+    }
+    return Real_WaitForSingleObject(hHandle, (DWORD)(dwMilliseconds / SpeedFactor()));
+}
+
+typedef DWORD (WINAPI* WAITFORSINGLEOBJECTEX) (HANDLE, DWORD, BOOL);
+
+static WAITFORSINGLEOBJECTEX Real_WaitForSingleObjectEx = NULL;
+
+DWORD WINAPI Hook_WaitForSingleObjectEx(HANDLE hHandle, DWORD dwMilliseconds, BOOL bAlertable)
+{
+    if (dwMilliseconds == 0 || dwMilliseconds == INFINITE) {
+        return Real_WaitForSingleObjectEx(hHandle, dwMilliseconds, bAlertable);
+    }
+    return Real_WaitForSingleObjectEx(hHandle, (DWORD)(dwMilliseconds / SpeedFactor()), bAlertable);
+}
+
+typedef DWORD (WINAPI* WAITFORMULTIPLEOBJECTS) (DWORD, const HANDLE*, BOOL, DWORD);
+
+static WAITFORMULTIPLEOBJECTS Real_WaitForMultipleObjects = NULL;
+
+DWORD WINAPI Hook_WaitForMultipleObjects(DWORD nCount, const HANDLE* lpHandles, BOOL bWaitAll, DWORD dwMilliseconds)
+{
+    if (dwMilliseconds == 0 || dwMilliseconds == INFINITE) {
+        return Real_WaitForMultipleObjects(nCount, lpHandles, bWaitAll, dwMilliseconds);
+    }
+    return Real_WaitForMultipleObjects(nCount, lpHandles, bWaitAll, (DWORD)(dwMilliseconds / SpeedFactor()));
+}
+
+typedef DWORD (WINAPI* WAITFORMULTIPLEOBJECTSEX) (DWORD, const HANDLE*, BOOL, DWORD, BOOL);
+
+static WAITFORMULTIPLEOBJECTSEX Real_WaitForMultipleObjectsEx = NULL;
+
+DWORD WINAPI Hook_WaitForMultipleObjectsEx(DWORD nCount, const HANDLE* lpHandles, BOOL bWaitAll, DWORD dwMilliseconds, BOOL bAlertable)
+{
+    if (dwMilliseconds == 0 || dwMilliseconds == INFINITE) {
+        return Real_WaitForMultipleObjectsEx(nCount, lpHandles, bWaitAll, dwMilliseconds, bAlertable);
+    }
+    return Real_WaitForMultipleObjectsEx(nCount, lpHandles, bWaitAll, (DWORD)(dwMilliseconds / SpeedFactor()), bAlertable);
+}
+
 typedef UINT_PTR (WINAPI* SETTIMER) (HWND, UINT_PTR, UINT, TIMERPROC);
 
 static SETTIMER Real_SetTimer = NULL;
@@ -370,27 +418,6 @@ BOOL WINAPI Hook_QueryPerformanceCounter(LARGE_INTEGER* lpPerformanceCount)
     *lpPerformanceCount = result;
     lastHook_QueryPerformanceCounter.store(result);
     return rtncode;
-}
-
-static std::atomic<LARGE_INTEGER> baseReal_QueryPerformanceFrequency{};
-
-typedef BOOL (WINAPI* QUERYPERFORMANCEFREQUENCY) (LARGE_INTEGER*);
-
-static QUERYPERFORMANCEFREQUENCY Real_QueryPerformanceFrequency = NULL;
-
-BOOL WINAPI Hook_QueryPerformanceFrequency(LARGE_INTEGER* lpFrequency)
-{
-
-    if (lpFrequency == NULL)
-    {
-        return FALSE;
-    }
-    else
-    {
-        BOOL rtncode = Real_QueryPerformanceFrequency(lpFrequency);
-        lpFrequency->QuadPart = SpeedFactor() * lpFrequency->QuadPart;
-        return rtncode;
-    }
 }
 
 static std::atomic<FILETIME> baseReal_GetSystemTimeAsFileTime({ 0 });
@@ -593,11 +620,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
             baseHook_QueryPerformanceCounter.store(qpc);
             lastHook_QueryPerformanceCounter.store(qpc);
 
-            /* Initial QueryPerformanceFrequency */
-            LARGE_INTEGER qpf;
-            QueryPerformanceFrequency(&qpf);
-            baseReal_QueryPerformanceFrequency.store(qpf);
-
             /* Initial GetSystemTimeAsFileTime */
             GetSystemTimeAsFileTime(&now);
             baseReal_GetSystemTimeAsFileTime.store(now);
@@ -615,9 +637,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
         MH_HOOK(&Sleep, &Hook_Sleep, reinterpret_cast<LPVOID*> (&Real_Sleep));
         MH_HOOK(&SleepEx, &Hook_SleepEx, reinterpret_cast<LPVOID*>(&Real_SleepEx));
-
+        MH_HOOK(&WaitForSingleObject, &Hook_WaitForSingleObject, reinterpret_cast<LPVOID*>(&Real_WaitForSingleObject));
+        MH_HOOK(&WaitForSingleObjectEx, &Hook_WaitForSingleObjectEx, reinterpret_cast<LPVOID*>(&Real_WaitForSingleObjectEx));
+        MH_HOOK(&WaitForMultipleObjects, &Hook_WaitForMultipleObjects, reinterpret_cast<LPVOID*>(&Real_WaitForMultipleObjects));
+        MH_HOOK(&WaitForMultipleObjectsEx, &Hook_WaitForMultipleObjectsEx, reinterpret_cast<LPVOID*>(&Real_WaitForMultipleObjectsEx));
         MH_HOOK(&SetWaitableTimer, &Hook_SetWaitableTimer, reinterpret_cast<LPVOID*>(&Real_SetWaitableTimer));
-
         MH_HOOK(&SetWaitableTimerEx, &Hook_SetWaitableTimerEx, reinterpret_cast<LPVOID*>(&Real_SetWaitableTimerEx));
         MH_HOOK(&SetTimer, &Hook_SetTimer, reinterpret_cast<LPVOID*> (&Real_SetTimer));
         MH_HOOK(&timeGetTime, &Hook_TimeGetTime, reinterpret_cast<LPVOID*> (&Real_TimeGetTime));
@@ -644,6 +668,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         {
             std::unique_lock<std::shared_mutex> lock(mutex);
             MH_UNHOOK(Real_Sleep);
+            MH_UNHOOK(Real_SleepEx);
+            MH_UNHOOK(Real_WaitForSingleObject);
+            MH_UNHOOK(Real_WaitForSingleObjectEx);
+            MH_UNHOOK(Real_WaitForMultipleObjects);
+            MH_UNHOOK(Real_WaitForMultipleObjectsEx);
             MH_UNHOOK(Real_SetWaitableTimer);
             MH_UNHOOK(Real_SetWaitableTimerEx);
             MH_UNHOOK(Real_SetTimer);
