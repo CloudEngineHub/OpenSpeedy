@@ -114,11 +114,11 @@ const ProcessTable = function ProcessTable({
   const isPid = tab === 0;
 
   // ── Sorting ──────────────────────────────────────────────────────────
-  const [sortCol, setSortCol] = useState<SortCol>(isPid ? "enabled" : null);
+  const [sortCol, setSortCol] = useState<SortCol>(isPid ? "memory" : null);
   const [sortAsc, setSortAsc] = useState(false);
 
-  // Default: isPid mode sorts by enabled (accelerated on top)
-  useEffect(() => { setSortCol(isPid ? "enabled" : null); setSortAsc(false); }, [tab]);
+  // Default: isPid mode sorts by memory descending, name mode no sort
+  useEffect(() => { setSortCol(isPid ? "memory" : null); setSortAsc(false); }, [tab]);
 
   function toggleSort(col: SortCol) {
     if (sortCol === col) { setSortAsc(!sortAsc); } else { setSortCol(col); setSortAsc(true); }
